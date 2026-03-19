@@ -1,0 +1,81 @@
+<mujoco model="quadruped">
+  <compiler angle="degree"/>
+  <option gravity="0 0 -9.81" timestep="0.002"/>
+
+  <worldbody>
+    <light pos="0 0 3" dir="0 0 -1"/>
+    <geom type="plane" size="10 10 0.1" rgba="0.9 0.9 0.9 1"/>
+
+    <body name="torso" pos="0 0 0.5">
+      <freejoint name="root"/>
+      <geom type="box" size="0.4 0.2 0.1" mass="5" rgba="0.3 0.3 0.8 1"/>
+
+      <!-- Front-left leg -->
+      <body name="fl_upper" pos="0.3 0.2 0">
+        <joint name="fl_hip" type="hinge" axis="0 1 0" range="-60 60"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.04" mass="0.5"
+              rgba="0.8 0.2 0.2 1"/>
+        <body name="fl_lower" pos="0 0 -0.3">
+          <joint name="fl_knee" type="hinge" axis="0 1 0" range="-90 0"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.03" mass="0.3"
+                rgba="0.8 0.4 0.4 1"/>
+        </body>
+      </body>
+
+      <!-- Front-right leg -->
+      <body name="fr_upper" pos="0.3 -0.2 0">
+        <joint name="fr_hip" type="hinge" axis="0 1 0" range="-60 60"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.04" mass="0.5"
+              rgba="0.2 0.8 0.2 1"/>
+        <body name="fr_lower" pos="0 0 -0.3">
+          <joint name="fr_knee" type="hinge" axis="0 1 0" range="-90 0"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.03" mass="0.3"
+                rgba="0.4 0.8 0.4 1"/>
+        </body>
+      </body>
+
+      <!-- Back-left leg -->
+      <body name="bl_upper" pos="-0.3 0.2 0">
+        <joint name="bl_hip" type="hinge" axis="0 1 0" range="-60 60"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.04" mass="0.5"
+              rgba="0.8 0.8 0.2 1"/>
+        <body name="bl_lower" pos="0 0 -0.3">
+          <joint name="bl_knee" type="hinge" axis="0 1 0" range="-90 0"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.03" mass="0.3"
+                rgba="0.8 0.8 0.5 1"/>
+        </body>
+      </body>
+
+      <!-- Back-right leg -->
+      <body name="br_upper" pos="-0.3 -0.2 0">
+        <joint name="br_hip" type="hinge" axis="0 1 0" range="-60 60"/>
+        <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.04" mass="0.5"
+              rgba="0.2 0.2 0.8 1"/>
+        <body name="br_lower" pos="0 0 -0.3">
+          <joint name="br_knee" type="hinge" axis="0 1 0" range="-90 0"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.3" size="0.03" mass="0.3"
+                rgba="0.4 0.4 0.8 1"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="fl_hip_motor" joint="fl_hip" gear="100"/>
+    <motor name="fl_knee_motor" joint="fl_knee" gear="50"/>
+    <motor name="fr_hip_motor" joint="fr_hip" gear="100"/>
+    <motor name="fr_knee_motor" joint="fr_knee" gear="50"/>
+    <motor name="bl_hip_motor" joint="bl_hip" gear="100"/>
+    <motor name="bl_knee_motor" joint="bl_knee" gear="50"/>
+    <motor name="br_hip_motor" joint="br_hip" gear="100"/>
+    <motor name="br_knee_motor" joint="br_knee" gear="50"/>
+  </actuator>
+
+  <sensor>
+    <jointpos joint="fl_hip"/><jointpos joint="fl_knee"/>
+    <jointpos joint="fr_hip"/><jointpos joint="fr_knee"/>
+    <jointpos joint="bl_hip"/><jointpos joint="bl_knee"/>
+    <jointpos joint="br_hip"/><jointpos joint="br_knee"/>
+    <framepos objtype="body" objname="torso"/>
+  </sensor>
+</mujoco>
