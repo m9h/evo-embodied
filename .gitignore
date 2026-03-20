@@ -6,3 +6,5 @@ dist/
 build/
 .ipynb_checkpoints/
 MUJOCO_LOG.TXT
+evolved_quadruped.mp4
+fitness_curve.png
