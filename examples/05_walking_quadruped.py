@@ -12,9 +12,13 @@ Run: uv run python examples/05_walking_quadruped.py
 """
 import argparse
 import json
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Force EGL for headless rendering (must be before mujoco import)
+os.environ.setdefault("MUJOCO_GL", "egl")
 
 import jax
 import jax.numpy as jnp
