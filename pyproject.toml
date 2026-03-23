@@ -20,5 +20,6 @@ dependencies = [
 gpu = ["jax[cuda13]>=0.8.0"]
 strategies = ["evosax>=0.1"]
 rl = ["brax>=0.12", "dm_control>=1.0"]
+demos = ["mujoco-playground>=0.1", "onnxruntime>=1.17"]
 llm = ["openai>=1.0"]
-full = ["evo-embodied[gpu,strategies,rl,llm]"]
+full = ["evo-embodied[gpu,strategies,rl,demos,llm]"]
