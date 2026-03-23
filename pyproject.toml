@@ -17,7 +17,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-gpu = ["jax[cuda12]>=0.4.35"]
+gpu = ["jax[cuda13]>=0.8.0"]
 strategies = ["evosax>=0.1"]
 rl = ["brax>=0.12", "dm_control>=1.0"]
-full = ["evo-embodied[gpu,strategies,rl]"]
+llm = ["openai>=1.0"]
+full = ["evo-embodied[gpu,strategies,rl,llm]"]
