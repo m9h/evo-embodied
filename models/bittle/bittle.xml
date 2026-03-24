@@ -1,0 +1,216 @@
+<mujoco model="bittle">
+  <!--
+    Petoi Bittle quadruped robot — hand-authored MJCF for sim2real.
+    Based on measurements from AIWintermuteAI/Bittle_URDF.
+
+    Joint mapping to Petoi serial protocol:
+      Joint 0: head (not modeled — add if needed)
+      Joint 8:  left-front-shoulder  → shoulder_fl
+      Joint 9:  right-front-shoulder → shoulder_fr
+      Joint 10: right-back-shoulder  → shoulder_br
+      Joint 11: left-back-shoulder   → shoulder_bl
+      Joint 12: left-front-knee      → knee_fl
+      Joint 13: right-front-knee     → knee_fr
+      Joint 14: right-back-knee      → knee_br
+      Joint 15: left-back-knee       → knee_bl
+
+    Coordinate frame: x=forward, y=left, z=up
+    Units: meters, kg, radians
+  -->
+
+  <compiler angle="radian" eulerseq="xyz"/>
+
+  <option gravity="0 0 -9.81" timestep="0.002">
+    <flag warmstart="enable"/>
+  </option>
+
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+  </visual>
+
+  <default>
+    <joint damping="0.05" armature="0.01"/>
+    <geom friction="0.8 0.02 0.01" condim="3" conaffinity="1" contype="1"/>
+    <motor ctrlrange="-1.5 1.5" ctrllimited="true"/>
+    <position kp="5.0" kv="0.5" ctrlrange="-1.57 1.57"/>
+    <!-- Servo default: position actuator with first-order filter for servo delay -->
+    <default class="servo">
+      <general dyntype="filter" dynprm="0.04" gaintype="fixed" biastype="affine"
+               gainprm="5.0" biasprm="0 -5.0 -0.5"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.6 0.8 1.0" rgb2="0.2 0.4 0.8"
+             width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.9 0.9 0.9"
+             rgb2="0.7 0.7 0.7" width="512" height="512"/>
+    <material name="grid" texture="grid" texrepeat="8 8" reflectance="0.1"/>
+    <material name="body" rgba="0.2 0.2 0.8 1"/>
+    <material name="leg" rgba="0.6 0.6 0.6 1"/>
+    <material name="foot" rgba="0.3 0.3 0.3 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+    <geom type="plane" size="2 2 0.1" material="grid"/>
+
+    <!-- Bittle body -->
+    <body name="torso" pos="0 0 0.12">
+      <freejoint name="root"/>
+      <inertial pos="0 0 0" mass="0.177" diaginertia="0.00062 0.0016 0.0021"/>
+
+      <!-- Main body box (simplified from mesh) -->
+      <!-- Bittle is ~200mm long, ~110mm wide, ~35mm tall -->
+      <geom type="box" size="0.05 0.028 0.018" pos="0 0 0"
+            material="body" mass="0.108"/>
+      <!-- Battery underneath -->
+      <geom type="box" size="0.035 0.022 0.012" pos="0 0 -0.025"
+            material="body" mass="0.056"/>
+      <!-- Cover on top -->
+      <geom type="box" size="0.04 0.025 0.005" pos="0 0 0.023"
+            material="body" mass="0.013"/>
+
+      <!-- IMU sensor site (MPU6050 on mainboard) -->
+      <site name="imu" pos="0 0 0.01" size="0.005"/>
+
+      <!-- ============ FRONT LEFT LEG ============ -->
+      <body name="shoulder_fl" pos="0.045 0.035 0">
+        <joint name="shoulder_fl" type="hinge" axis="0 1 0"
+               range="-1.57 1.22" ref="0"/>
+        <inertial pos="0 0.012 -0.015" mass="0.006"
+                  diaginertia="0.00002 0.00044 0.00044"/>
+        <geom type="capsule" fromto="0 0 0 0 0.024 -0.030"
+              size="0.008" material="leg"/>
+
+        <body name="knee_fl" pos="0 0.024 -0.030">
+          <joint name="knee_fl" type="hinge" axis="0 1 0"
+                 range="-1.22 1.48" ref="0"/>
+          <inertial pos="0 0 -0.025" mass="0.017"
+                    diaginertia="0.00006 0.00065 0.00063"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.050"
+                size="0.006" material="leg"/>
+          <!-- Foot contact point -->
+          <geom name="foot_fl" type="sphere" pos="0 0 -0.052"
+                size="0.008" material="foot"/>
+          <site name="foot_fl" pos="0 0 -0.052" size="0.008"/>
+        </body>
+      </body>
+
+      <!-- ============ FRONT RIGHT LEG ============ -->
+      <body name="shoulder_fr" pos="0.045 -0.035 0">
+        <joint name="shoulder_fr" type="hinge" axis="0 1 0"
+               range="-1.57 1.22" ref="0"/>
+        <inertial pos="0 -0.012 -0.015" mass="0.006"
+                  diaginertia="0.00002 0.00044 0.00044"/>
+        <geom type="capsule" fromto="0 0 0 0 -0.024 -0.030"
+              size="0.008" material="leg"/>
+
+        <body name="knee_fr" pos="0 -0.024 -0.030">
+          <joint name="knee_fr" type="hinge" axis="0 1 0"
+                 range="-1.22 1.48" ref="0"/>
+          <inertial pos="0 0 -0.025" mass="0.017"
+                    diaginertia="0.00006 0.00065 0.00063"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.050"
+                size="0.006" material="leg"/>
+          <geom name="foot_fr" type="sphere" pos="0 0 -0.052"
+                size="0.008" material="foot"/>
+          <site name="foot_fr" pos="0 0 -0.052" size="0.008"/>
+        </body>
+      </body>
+
+      <!-- ============ BACK LEFT LEG ============ -->
+      <body name="shoulder_bl" pos="-0.045 0.035 0">
+        <joint name="shoulder_bl" type="hinge" axis="0 1 0"
+               range="-1.57 1.22" ref="0"/>
+        <inertial pos="0 0.012 -0.015" mass="0.006"
+                  diaginertia="0.00002 0.00044 0.00044"/>
+        <geom type="capsule" fromto="0 0 0 0 0.024 -0.030"
+              size="0.008" material="leg"/>
+
+        <body name="knee_bl" pos="0 0.024 -0.030">
+          <joint name="knee_bl" type="hinge" axis="0 1 0"
+                 range="-1.22 1.48" ref="0"/>
+          <inertial pos="0 0 -0.025" mass="0.017"
+                    diaginertia="0.00006 0.00065 0.00063"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.050"
+                size="0.006" material="leg"/>
+          <geom name="foot_bl" type="sphere" pos="0 0 -0.052"
+                size="0.008" material="foot"/>
+          <site name="foot_bl" pos="0 0 -0.052" size="0.008"/>
+        </body>
+      </body>
+
+      <!-- ============ BACK RIGHT LEG ============ -->
+      <body name="shoulder_br" pos="-0.045 -0.035 0">
+        <joint name="shoulder_br" type="hinge" axis="0 1 0"
+               range="-1.57 1.22" ref="0"/>
+        <inertial pos="0 -0.012 -0.015" mass="0.006"
+                  diaginertia="0.00002 0.00044 0.00044"/>
+        <geom type="capsule" fromto="0 0 0 0 -0.024 -0.030"
+              size="0.008" material="leg"/>
+
+        <body name="knee_br" pos="0 -0.024 -0.030">
+          <joint name="knee_br" type="hinge" axis="0 1 0"
+                 range="-1.22 1.48" ref="0"/>
+          <inertial pos="0 0 -0.025" mass="0.017"
+                    diaginertia="0.00006 0.00065 0.00063"/>
+          <geom type="capsule" fromto="0 0 0 0 0 -0.050"
+                size="0.006" material="leg"/>
+          <geom name="foot_br" type="sphere" pos="0 0 -0.052"
+                size="0.008" material="foot"/>
+          <site name="foot_br" pos="0 0 -0.052" size="0.008"/>
+        </body>
+      </body>
+
+    </body>
+  </worldbody>
+
+  <!-- Position-controlled actuators (matching hobby servo behavior) -->
+  <actuator>
+    <position name="servo_shoulder_fl" joint="shoulder_fl" kp="5.0" kv="0.5"
+              ctrlrange="-1.57 1.22"/>
+    <position name="servo_knee_fl" joint="knee_fl" kp="5.0" kv="0.5"
+              ctrlrange="-1.22 1.48"/>
+    <position name="servo_shoulder_fr" joint="shoulder_fr" kp="5.0" kv="0.5"
+              ctrlrange="-1.57 1.22"/>
+    <position name="servo_knee_fr" joint="knee_fr" kp="5.0" kv="0.5"
+              ctrlrange="-1.22 1.48"/>
+    <position name="servo_shoulder_bl" joint="shoulder_bl" kp="5.0" kv="0.5"
+              ctrlrange="-1.57 1.22"/>
+    <position name="servo_knee_bl" joint="knee_bl" kp="5.0" kv="0.5"
+              ctrlrange="-1.22 1.48"/>
+    <position name="servo_shoulder_br" joint="shoulder_br" kp="5.0" kv="0.5"
+              ctrlrange="-1.57 1.22"/>
+    <position name="servo_knee_br" joint="knee_br" kp="5.0" kv="0.5"
+              ctrlrange="-1.22 1.48"/>
+  </actuator>
+
+  <!-- Sensors matching real Bittle hardware -->
+  <sensor>
+    <!-- IMU (MPU6050) -->
+    <accelerometer name="imu_accel" site="imu"/>
+    <gyro name="imu_gyro" site="imu"/>
+    <framequat name="imu_quat" objtype="site" objname="imu"/>
+
+    <!-- Joint positions (feedback servos on Bittle X V2) -->
+    <jointpos joint="shoulder_fl"/>
+    <jointpos joint="knee_fl"/>
+    <jointpos joint="shoulder_fr"/>
+    <jointpos joint="knee_fr"/>
+    <jointpos joint="shoulder_bl"/>
+    <jointpos joint="knee_bl"/>
+    <jointpos joint="shoulder_br"/>
+    <jointpos joint="knee_br"/>
+
+    <!-- Foot contact (touch sensors — virtual, for reward shaping) -->
+    <touch name="touch_fl" site="foot_fl"/>
+    <touch name="touch_fr" site="foot_fr"/>
+    <touch name="touch_bl" site="foot_bl"/>
+    <touch name="touch_br" site="foot_br"/>
+
+    <!-- Torso position/velocity (for fitness, not available on real robot) -->
+    <framepos name="torso_pos" objtype="body" objname="torso"/>
+    <framexaxis name="torso_xaxis" objtype="body" objname="torso"/>
+  </sensor>
+</mujoco>
