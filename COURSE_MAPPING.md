@@ -373,8 +373,8 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 | 13 | GA / Phototaxis | `examples/05_walking_quadruped.py` | `models/quadruped.xml` |
 | 14 | Leap-and-Flail | `docs/FITNESS_DESIGN.md` | — |
 | 15 | Coordinated Gait | `examples/09_coordinated_gait.py` | `models/quadruped.xml` |
-| 16 | Bittle Model | `models/bittle/bittle.xml` | `models/bittle/bittle.xml` |
-| 17 | Domain Randomization | (modify 15 for Bittle) | `models/bittle/bittle.xml` |
+| 16 | Bittle Model | `examples/10_bittle_gait.py` | `models/bittle/bittle.xml` |
+| 17 | Domain Randomization | `examples/11_domain_randomization.py` | `models/bittle/bittle.xml` |
 | 18 | Deploy to Bittle | `sim2real/deploy_bittle.py` | `models/bittle/bittle.xml` |
 | 19 | Evolution vs. RL | `examples/00_reference_demos.py` | (brax envs) |
 | 20 | Virtualrat Pipeline | `examples/06-08_*.py` | (varies) |

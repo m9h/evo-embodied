@@ -172,6 +172,8 @@ purely from sensor feedback — which is possible but much slower.
 |-----------|-----------------|-----------|----------|
 | 05 (distance) | x_dist - height_pen - y_drift | 11.27 | Leap and flail |
 | 09 (velocity) | velocity - energy - smooth + alive - drift | TBD | Expected: coordinated gait |
+| 10 (Bittle gait) | same as 09, position ctrl, phase clocks | TBD | Bittle-specific gait for sim2real |
+| 11 (domain rand) | same as 10 + sensor/action noise | TBD | Robust policy for real hardware |
 
 The absolute fitness numbers are not comparable across fitness functions
 (they measure different things). What matters is the *behavior*.
