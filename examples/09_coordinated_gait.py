@@ -46,18 +46,21 @@ N_GENERATIONS = 500
 N_HIDDEN = 64
 CONTROL_STEPS = 200       # 200 control decisions = 8 seconds
 PHYSICS_PER_CTRL = 20     # 25 Hz control
-MUTATION_SCALE = 0.1
-MUTATION_DECAY = 0.9995
+MUTATION_SCALE = 0.15
+MUTATION_DECAY = 0.999
 SEED = 42
 
 # Fitness weights — the key to getting gaits instead of leaps
-VELOCITY_WEIGHT = 1.0       # reward forward velocity (m/s)
-ENERGY_WEIGHT = 0.005       # penalize sum of squared torques
-SMOOTHNESS_WEIGHT = 0.1     # penalize |ctrl_t - ctrl_{t-1}|
+VELOCITY_WEIGHT = 5.0       # dominant: velocity GATED by health (see below)
+ENERGY_WEIGHT = 0.03        # penalize explosive torques (prevents leaping)
+SMOOTHNESS_WEIGHT = 0.05    # penalize |ctrl_t - ctrl_{t-1}|
 HEIGHT_PENALTY_WEIGHT = 5.0 # penalize torso below threshold
-ALIVE_BONUS = 0.1           # per-step reward for staying upright
+UPRIGHT_WEIGHT = 2.0        # penalize tilting/flipping
+ALIVE_BONUS = 0.0           # zero — standing still earns nothing
 DRIFT_WEIGHT = 0.3          # penalize lateral drift
-MIN_TORSO_HEIGHT = 0.2      # below this = falling
+MIN_TORSO_HEIGHT = 0.25     # below this = fallen
+MAX_TORSO_HEIGHT = 0.75     # above this = airborne (leaping)
+UPRIGHT_THRESHOLD = 0.5     # below this = flipped (torso z-axis dot)
 CLOCK_FREQ_HZ = 2.0         # gait oscillator frequency
 
 RENDER_CTRL_STEPS = 300     # 12 seconds of video
@@ -88,16 +91,19 @@ def save_config(run_dir):
             "energy": ENERGY_WEIGHT,
             "smoothness": SMOOTHNESS_WEIGHT,
             "height_penalty": HEIGHT_PENALTY_WEIGHT,
+            "upright": UPRIGHT_WEIGHT,
             "alive_bonus": ALIVE_BONUS,
             "drift": DRIFT_WEIGHT,
         },
         "min_torso_height": MIN_TORSO_HEIGHT,
+        "max_torso_height": MAX_TORSO_HEIGHT,
+        "upright_threshold": UPRIGHT_THRESHOLD,
         "clock_freq_hz": CLOCK_FREQ_HZ,
-        "fitness": ("velocity_weight * mean_forward_vel "
+        "fitness": ("velocity_weight * mean_GATED_vel "
                     "- energy_weight * mean_squared_torque "
                     "- smoothness_weight * mean_ctrl_change "
                     "- height_penalty_weight * mean_height_violation "
-                    "+ alive_bonus * n_alive_steps "
+                    "- upright_weight * mean_upright_penalty "
                     "- drift_weight * abs(final_y)"),
     }
     (run_dir / "config.json").write_text(json.dumps(config, indent=2))
@@ -129,7 +135,7 @@ def make_evaluate_fn(mjx_model, n_sensors, n_motors):
             return mjx.step(mjx_model, data), None
 
         def control_step(carry, ctrl_idx):
-            data, prev_ctrl = carry
+            data, prev_ctrl, was_healthy = carry
 
             # Clock signal
             t = ctrl_idx * ctrl_dt
@@ -153,51 +159,63 @@ def make_evaluate_fn(mjx_model, n_sensors, n_motors):
             x_vel = data.qvel[0]  # forward velocity
             energy = jnp.sum(ctrl ** 2)  # squared torque proxy
             ctrl_change = jnp.sum((ctrl - prev_ctrl) ** 2)  # smoothness
-            alive = (torso_z > MIN_TORSO_HEIGHT).astype(jnp.float32)
 
-            metrics = jnp.array([x_vel, energy, ctrl_change, torso_z, alive])
-            return (data, ctrl), metrics
+            # Uprightness from torso quaternion (qpos[3:7] = w,x,y,z)
+            qx, qy = data.qpos[4], data.qpos[5]
+            upright = 1.0 - 2.0 * (qx**2 + qy**2)  # 1=upright, -1=flipped
+
+            # Health: on ground + not airborne + upright
+            step_healthy = (
+                (torso_z > MIN_TORSO_HEIGHT)
+                & (torso_z < MAX_TORSO_HEIGHT)
+                & (upright > UPRIGHT_THRESHOLD)
+            ).astype(jnp.float32)
+
+            # Early termination: once unhealthy, stays dead
+            is_healthy = was_healthy * step_healthy
+
+            # GATED VELOCITY: only counts when healthy
+            # The key anti-leap mechanism — airborne velocity = 0 reward
+            gated_vel = x_vel * is_healthy
+
+            upright_penalty = jnp.maximum(0.0, 1.0 - upright)
+
+            metrics = jnp.array([gated_vel, energy, ctrl_change, torso_z,
+                                 is_healthy, upright_penalty])
+            return (data, ctrl, is_healthy), metrics
 
         init_ctrl = jnp.zeros(n_motors)
-        (final_data, _), all_metrics = jax.lax.scan(
+        (final_data, _, _), all_metrics = jax.lax.scan(
             control_step,
-            (mjx_data, init_ctrl),
+            (mjx_data, init_ctrl, jnp.float32(1.0)),
             jnp.arange(CONTROL_STEPS),
         )
 
-        # Unpack metrics: [ctrl_steps, 5]
-        x_vels = all_metrics[:, 0]
+        # Unpack metrics: [ctrl_steps, 6]
+        gated_vels = all_metrics[:, 0]
         energies = all_metrics[:, 1]
         ctrl_changes = all_metrics[:, 2]
         torso_heights = all_metrics[:, 3]
-        alive_steps = all_metrics[:, 4]
+        healthy_steps = all_metrics[:, 4]
+        upright_pens = all_metrics[:, 5]
 
-        # Fitness components
-        # 1. Mean forward velocity (not distance!) — rewards sustained movement
-        mean_fwd_vel = jnp.mean(x_vels)
-
-        # 2. Energy cost — penalizes flailing
+        # Velocity only counted while healthy (on ground + upright)
+        mean_gated_vel = jnp.mean(gated_vels)
         mean_energy = jnp.mean(energies)
-
-        # 3. Smoothness — penalizes jerky control changes
         mean_smoothness = jnp.mean(ctrl_changes)
-
-        # 4. Height penalty — penalizes being below threshold
         height_violations = jnp.maximum(0.0, MIN_TORSO_HEIGHT - torso_heights)
         mean_height_pen = jnp.mean(height_violations)
-
-        # 5. Alive bonus — per-step reward for staying upright
-        total_alive = jnp.sum(alive_steps)
-
-        # 6. Lateral drift
+        total_healthy = jnp.sum(healthy_steps)
+        mean_upright_pen = jnp.mean(upright_pens)
         y_drift = jnp.abs(final_data.qpos[1])
 
         fitness = (
-            VELOCITY_WEIGHT * mean_fwd_vel
+            VELOCITY_WEIGHT * mean_gated_vel
             - ENERGY_WEIGHT * mean_energy
             - SMOOTHNESS_WEIGHT * mean_smoothness
             - HEIGHT_PENALTY_WEIGHT * mean_height_pen
-            + ALIVE_BONUS * total_alive
+            - UPRIGHT_WEIGHT * mean_upright_pen
+            + ALIVE_BONUS * total_healthy
             - DRIFT_WEIGHT * y_drift
         )
 
@@ -373,12 +391,14 @@ if __name__ == "__main__":
 
     evaluate_batch, n_w = make_evaluate_fn(mjx_model, n_s, n_m)
     print(f"Network: {n_s}+2 → {N_HIDDEN} → {n_m} ({n_w} weights)", flush=True)
-    print(f"\nFitness = {VELOCITY_WEIGHT}*velocity "
+    print(f"\nFitness = {VELOCITY_WEIGHT}*GATED_velocity "
           f"- {ENERGY_WEIGHT}*energy "
           f"- {SMOOTHNESS_WEIGHT}*smoothness "
           f"- {HEIGHT_PENALTY_WEIGHT}*height_pen "
-          f"+ {ALIVE_BONUS}*alive "
-          f"- {DRIFT_WEIGHT}*drift\n", flush=True)
+          f"- {UPRIGHT_WEIGHT}*upright_pen "
+          f"- {DRIFT_WEIGHT}*drift"
+          f"\n  (velocity gated by health: {MIN_TORSO_HEIGHT}<z<{MAX_TORSO_HEIGHT}, "
+          f"upright>{UPRIGHT_THRESHOLD})\n", flush=True)
 
     best_weights, best_hist, mean_hist = evolve(
         mjx_model, evaluate_batch, n_w, run_dir)

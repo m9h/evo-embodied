@@ -2,13 +2,14 @@
 #SBATCH --job-name=evo-gait
 #SBATCH --output=/data/evo-embodied/gait_%j.log
 #SBATCH --error=/data/evo-embodied/gait_%j.log
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=8
 
-# Coordinated gait evolution with velocity-based fitness
-# Replaces distance-based fitness that produced leap-and-flail
+# Coordinated gait evolution with GATED velocity fitness
+# Velocity only counts when healthy (on ground + upright)
+# Prevents leap-and-flail exploit that plagued distance and naive velocity fitness
 #
 # Submit: sbatch slurm/coordinated_gait.sbatch
 # Monitor: tail -f /data/evo-embodied/gait_<jobid>.log
@@ -23,7 +24,7 @@ echo "Start: $(date)"
 echo "Job ID: ${SLURM_JOB_ID}"
 echo ""
 
-cd /home/mhough/evo-embodied
+cd /home/mhough/dev/evo-embodied
 
 # Ensure environment is set up
 if [ ! -d .venv ]; then
