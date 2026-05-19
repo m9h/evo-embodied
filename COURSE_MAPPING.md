@@ -352,6 +352,40 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 
 **D. Cortical control** — Connect bl1 (spiking neural network with STDP) as the controller instead of a feedforward network. The "brain" learns via spike-timing-dependent plasticity rather than evolved weights.
 
+**E. Soft-body co-design with control analysis** — The three-way pairing: differentiable physics + evolutionary search + network control theory.
+
+The setup:
+1. **Differentiable soft-body sim** — Evolution Gym for hands-on work (voxel co-design benchmark, [EvolutionGym/evogym](https://github.com/EvolutionGym/evogym)), with SoftZoo as the physics oracle ([zswang666/softzoo](https://github.com/zswang666/softzoo) — differentiable MPM, the same culture the xenobot/RoboDiff lineage uses)
+2. **evosax** — evolutionary search over voxel morphologies (already in the project)
+3. **[jaxctrl](https://github.com/m9h/jaxctrl)** — network control theory, applied to evolved morphologies:
+   - `KoopmanEstimator` / DMD to fit a reduced-order linear surrogate of soft-body dynamics around a gait limit cycle
+   - `controllability_gramian` on the surrogate — is the evolved body actually steerable, or did evolution find a body that locomotes but is uncontrollable?
+   - `lqr` on the surrogate — closed-loop control fed back into the differentiable sim
+
+**Pitch:** *Evolution finds the body, control theory analyzes whether it's actually controllable, the gradient closes the loop.* The same primitives that jaxctrl provides for analyzing gene regulatory networks and brain dynamics apply here — jaxctrl originated in network control theory (the Liu-Slotine-Barabási / Chen-Surana line) and biology was just the first application domain. A soft-body voxel robot is another structured network whose controllability can be analyzed with the same mathematics.
+
+**Reading:**
+- [`docs/RESEARCH_GAPS.md`](docs/RESEARCH_GAPS.md) — the math primitives this exercise stresses (saltation matrices, hybrid Floquet, randomized DMD) and which are still missing from the JAX ecosystem
+- [`docs/SIM2REAL.md`](docs/SIM2REAL.md) "Sim2Real in Context" — the broader landscape this assignment sits in
+- Matthews, Spielberg, Rus, Kriegman, Bongard, "Efficient automatic design of robots," [*PNAS* 2023](https://www.pnas.org/doi/abs/10.1073/pnas.2305180120) — RoboDiff, the differentiable successor to voxcraft from the xenobot authors
+- Kriegman et al., "A scalable pipeline for designing reconfigurable organisms," [*PNAS* 2020](https://www.pnas.org/doi/10.1073/pnas.1910837117) — the original xenobot paper: voxel evolution realized as living frog cells
+- Bruder et al., "Modeling and control of soft robots using the Koopman operator," [*RSS* 2019](https://www.roboticsproceedings.org/rss15/p60.pdf)
+
+**Exercise:**
+1. Use Evolution Gym to evolve a voxel locomotion morphology on a flat-terrain task
+2. Roll out the evolved best-of-generation; collect state trajectories (voxel positions + velocities)
+3. Fit a reduced linear surrogate via `jaxctrl.KoopmanEstimator` (exact DMD) on the trajectories
+4. Compute `controllability_gramian(A_koop, B_koop)` — quantify how steerable the morphology is from its actuators
+5. Solve `lqr(A_koop, B_koop, Q, R)` on the surrogate; deploy the resulting feedback law in the original nonlinear Evolution Gym sim
+6. Compare three controllers on the same evolved body: (a) the evolved open-loop controller, (b) random control, (c) LQR-from-Koopman-surrogate. Which works best? Why?
+
+**What students learn:** Three orthogonal optimization layers — morphology, controller-via-evolution, and controller-via-control-theory — and how they compose. Also: that the network-control-theoretic primitives in jaxctrl are domain-general. The same `controllability_gramian` that answers "is this evolved voxel robot steerable" answers "is this gene regulatory network controllable by transcription factor perturbations" and "which brain regions must we stimulate to drive a target dynamics."
+
+**Caveats to surface explicitly:**
+- Koopman/DMD on voxel sim data is only valid around a specific operating point (a stance, a gait limit cycle). It doesn't generalize to arbitrary maneuvers without re-fitting.
+- Evolution Gym uses smooth penalty-based contact, not hybrid contact. The saltation/hybrid-Floquet machinery (which would be needed for a rigorous controllability analysis through impacts) is currently missing from the JAX ecosystem — see RESEARCH_GAPS.md.
+- The control-theoretic surrogate is linear; the underlying dynamics are not. Multilinear LQR (jaxctrl L2) is the next step but expects more from the user.
+
 ---
 
 ## Assignment ↔ Script/File Map
@@ -415,5 +449,6 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 | Sim2real | No | No | **Bittle deployment** | MIMIC-MJX |
 | Domain randomization | No | No | **Yes** | — |
 | Reinforcement learning | No | No | — | **Brax PPO** |
-| Differentiable physics | No | Available | — | jaxctrl |
+| Differentiable physics | No | Available (MJX) | — | JAX-MPM (soft-body) |
+| Differentiable control theory | No | No | — | jaxctrl (Lyapunov, Riccati, Koopman, controllability) |
 | Research connection | No | No | — | **virtualrat stack** |

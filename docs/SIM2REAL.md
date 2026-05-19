@@ -160,6 +160,34 @@ These projects have successfully done Bittle sim2real:
 - [Jabbour et al. RSS 2022](https://a2r-lab.org/publication/bittlesim2real/) — academic paper on Bittle sim2real
 - [Akgun et al. 2024](https://arxiv.org/html/2402.13201) — Decision Transformers on Bittle
 
+## Sim2Real in Context
+
+This guide covers one corner of sim2real: **rigid-body, position-controlled, hobby-grade servos.** The "gap" being closed is a *dynamics gap* — servo delay, friction, mass, sensor noise. Domain randomization is the right tool, and Petoi Bittle is the right hardware. But this is one point in a much wider landscape, and students who want to understand where this project sits in the broader research field should know about the alternatives.
+
+### What counts as "sim2real" depends on what you're transferring to
+
+| Transfer target | Gap being closed | Simulator culture | Canonical work |
+|---|---|---|---|
+| **Rigid robot (this guide)** | Dynamics: servo delay, friction, mass, IMU noise | Standard rigid-body sim (MuJoCo, PyBullet) + domain randomization | [Jabbour et al. (Bittle, RSS 2022)](https://a2r-lab.org/publication/bittlesim2real/) |
+| **Soft / pneumatic robot** | Materials + manufacturing: elastomer modulus, pneumatic delay, fabrication tolerance | Differentiable MPM/FEM (SoftZoo, DiffPD, RoboDiff) — smooth contact for gradient flow | [Matthews, Spielberg, Rus, Kriegman, Bongard, *PNAS* 2023 (RoboDiff)](https://www.pnas.org/doi/abs/10.1073/pnas.2305180120) |
+| **Biobot (computationally designed organism)** | Developmental: voxel morphology → sculpted cardiac/skin cells from *Xenopus* frog embryos | Voxel-based mass-spring (voxcraft-sim) | [Kriegman, Blackiston, Levin, Bongard, *PNAS* 2020 (xenobots)](https://www.science.org/doi/10.1126/scirobotics.abf1571) |
+| **Continuum swimmer / FSI robot** | Medium coupling: reactive forces from fluid/granular environment | Differentiable MPM (SoftZoo) or CFD coupled with elastic structures | [Bruder et al., *RSS* 2019 (Koopman MPC for soft swimmers)](https://www.roboticsproceedings.org/rss15/p60.pdf) |
+
+Each row is a different sim2real problem, and each requires different mathematics. The Bittle gap can be closed with domain randomization. The soft-body gap requires getting elastomer constitutive parameters right. The biobot gap is closed by the *cells themselves* — the simulation just provides a morphology blueprint that frog skin and cardiac cells self-organize around. The fluid-coupling gap requires reduced-order models of the medium's response.
+
+### The two soft-body cultures
+
+Within soft-body sim there is a further split worth knowing:
+
+- **Hybrid / rigorous** (Hybrid Zero Dynamics, saltation matrices, legged-robot biomechanics): treats contact as a real switching event with proper jump linearizations. Mathematically clean; the standard tool for sim2real of legged systems.
+- **Smooth / gradient** (DiffTaichi, DiffPD, SoftZoo, RoboDiff): smooths contact with penalty forces or viscoelastic relaxation specifically to keep the simulation differentiable. Used by everyone doing gradient-based morphology design, including the direct xenobot lineage.
+
+The Bittle deployment in this guide sits in the hybrid culture (impacts, ground contact, real friction). If you cross over into voxel/soft-body evolution, you cross into the smooth culture. See [`docs/RESEARCH_GAPS.md`](RESEARCH_GAPS.md) for which mathematical primitives each side needs and what's still missing from the JAX ecosystem.
+
+### Why this matters for the course
+
+evo-embodied's Phase 4 (assignments 16-18) deliberately picks the *easiest* sim2real flavor — rigid quadruped on hard ground with feedback servos. Students who want to push further have the open-source platforms (Evolution Gym, SoftZoo, voxcraft-sim) and the unsolved problems (no JAX-native MPM, no first-class hybrid Floquet) waiting for them.
+
 ## Further Reading
 
 - [Petoi Serial Protocol](https://docs.petoi.com/apis/serial-protocol)
