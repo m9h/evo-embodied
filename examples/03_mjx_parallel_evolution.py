@@ -1,8 +1,8 @@
 """Assignment 11: Parallel hill climber with MJX + JAX.
 
-The key upgrade over PyBullet: instead of running N hill climbers
-sequentially, MJX + JAX vmap runs them ALL simultaneously on GPU (or
-parallelized on CPU). This is 10-1000x faster depending on hardware.
+MJX + JAX vmap batches independent hill climbers on supported accelerators
+or CPU. Measure throughput against a matched serial baseline; batching alone
+does not establish a speedup or change the evaluation budget.
 
 Run: uv run python examples/03_mjx_parallel_evolution.py
 """

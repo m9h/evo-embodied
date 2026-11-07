@@ -1,5 +1,19 @@
 # Math Primitives Soft-Body Robotics Surfaces for jaxctrl
 
+## Ecosystem update: November 2026
+
+The platform now uses MuJoCo/MJX 4.0 and JAX 0.12, with a tested optional QDax
+planar-arm comparison. [Project choices](PROJECT_CHOICES.md) and the
+[comparison catalog](RESEARCH_COMPARISONS.md) place QDax, Revolve2, EvoRL and
+TensorNEAT alongside the original EvoGym/RoboMorph references. Their presence
+does not establish a missing mathematical primitive or a new scientific result.
+
+MuJoCo 4 expands native deformables and model-calibration tools, while MJX-JAX
+still lacks flex support and MJX-Warp lacks physics autodiff. Choose a supported
+backend/task before proposing differentiable soft-body extensions. The immediate
+work remains the validated evaluator and matched baselines; the mathematical
+research proposals below follow those evidence gates.
+
 ## Validation scope
 
 This is an architectural proposal, not an ecosystem-wide novelty review or a

@@ -1,12 +1,27 @@
 # evo-embodied
 
-A learning environment for **embodied intelligence** using **MuJoCo + MJX + JAX**. Start with evolutionary robotics (evolve a walking quadruped), then follow the pathway into the full virtualrat research stack — biomechanically accurate rodent simulation, imitation learning, and active inference.
+A teaching and research environment for **evolutionary robotics and embodied
+intelligence** using **MuJoCo/MJX + JAX**. Learn to evolve controllers, explore
+diverse behaviors, and build toward body–controller co-design, developmental
+networks and lifetime plasticity. The virtual-rat pathway connects these skills
+to biomechanical simulation, imitation learning and active inference.
 
-## Two Purposes
+## Purpose and direction
 
 **1. Evolutionary Robotics Course** — a modern replacement for the pyrosim/PyBullet stack used in Josh Bongard's [CS 3060](https://www.reddit.com/r/ludobots/wiki/index) at UVM. GPU-parallel evolution via MJX, declarative MJCF models, and an API that matches current research practice.
 
 **2. On-Ramp to the Virtual Rat** — every concept learned here (MuJoCo physics, MJX GPU parallelism, JAX `vmap`/`jit`/`grad`, neural controllers, MJCF morphologies) reappears in the virtualrat pipeline. Students who complete the 13 assignments have the foundation to work with STAC-MJX, track-mjx, and the full embodied intelligence stack.
+
+**3. Reproducible research comparisons** — test whether behavioral diversity,
+development, plasticity and controllability-aware design improve adaptation at
+matched budgets. This is a research direction with executable integration
+checks; competitive results and paper reproductions remain to be established.
+
+See [project choices and integration priorities](docs/PROJECT_CHOICES.md) for
+the MuJoCo 4 feature boundaries and why each external project is included.
+The current population backend is **MJX-JAX**. Native MuJoCo is the CPU reference;
+MJX-Warp is a future NVIDIA comparison. MuJoCo 4's native deformables and
+speculative contacts are not automatically available in the JAX backend.
 
 ## Research validation
 
@@ -14,8 +29,8 @@ The repository contains teaching examples and research prototypes. Its status as
 a competitive research platform still needs measured evidence. Start here:
 
 - [Research demonstrations and comparison projects](docs/RESEARCH_COMPARISONS.md):
-  Braitenberg development/learning/collectives, EvoGym, RoboMorph, and suitable
-  optimization, control and neural-simulation references.
+  Braitenberg development/learning/collectives, QDax, Revolve2, EvoRL, TensorNEAT,
+  EvoGym, RoboMorph, and control/neural-simulation references.
 - [Validation plan](docs/VALIDATION_PLAN.md): experiment protocols, seed and compute
   budgets, reference versions, acceptance criteria and implementation sequence.
 - [Observed validation status](docs/VALIDATION_STATUS.md): local CPU/MJX replay
@@ -106,7 +121,7 @@ The virtualrat project connects several components into a pipeline for biomechan
 | Neural network controllers | track-mjx (policy networks), alf (generative models), bl1 (spiking nets) |
 | Fitness functions / reward shaping | track-mjx (imitation reward), alf (expected free energy) |
 | Evolutionary search (hill climber, GA) | evosax strategies, neuroevolution baselines |
-| `jax.grad` through physics (optional) | jaxctrl (differentiable LQR), track-mjx (policy gradients through MJX) |
+| `jax.grad` through physics (optional) | Gradient-based dynamics/control studies; ordinary PPO policy gradients do not require simulator gradients |
 
 ## Why Replace pyrosim/PyBullet?
 
@@ -145,6 +160,10 @@ uv sync --extra gpu
 
 # Run evolution with results saved to /data
 uv run python examples/05_walking_quadruped.py --output-dir /data/evo-embodied
+
+# Quality-diversity: MAP-Elites vs equal-budget random search, analytic planar arm
+uv run --locked --extra qd python examples/12_quality_diversity.py \
+  --seed 0 --seed 1 --seed 2 --output /tmp/qd-arm.json
 ```
 
 ## Mapping to Bongard's 13 Assignments
@@ -198,9 +217,17 @@ After the 13 assignments, students have the foundation for the full stack:
 | Extra | Install | What it enables |
 |-------|---------|----------------|
 | `strategies` | `uv sync --extra strategies` | `evosax` — GPU-accelerated CMA-ES, OpenES, PGPE |
-| `rl` | `uv sync --extra rl` | `brax` + `dm_control` — compare evolution vs. RL |
+| `qd` | `uv sync --extra qd` | QDax 0.5.0 — MAP-Elites, behavior archives and the validated analytic-arm example |
+| `rl` | `uv sync --extra rl` | Brax training + pinned reference tasks and `dm_control` |
+| `demos` | `uv sync --extra demos` | Playground 0.2 JAX/MJX references and ONNX Runtime |
+| `llm` | `uv sync --extra llm` | OpenAI client for explicitly run LLM proposal experiments |
 | `gpu` | `uv sync --extra gpu` | JAX CUDA backend for MJX |
 | `full` | `uv sync --extra full` | All research extras; CUDA is installed only on Linux |
+
+Current Playground uses PyTorch/Warp; its original JAX suite remains under
+`rss2025`. Brax maintains its training layer, while EvoJAX is archived. These
+version boundaries and the separate reference-worker plan are documented in
+[project choices](docs/PROJECT_CHOICES.md#reference-runtimes-and-boundaries).
 
 ## Key Concepts Introduced
 
@@ -211,7 +238,7 @@ After the 13 assignments, students have the foundation for the full stack:
 | **Vectorization** (`jax.vmap`) | Assignments 9-13 | Core technique in scientific computing, GPU programming |
 | **Functional programming** (JAX's pure-function model) | Assignments 9-13 | Reproducibility, parallelism, debugging |
 | **`jax.lax.scan`** (compiled loops) | Assignments 9-13 | Used in STAC-MJX, track-mjx, bl1 for long rollouts |
-| **Differentiable simulation** (optional) | Final projects | jaxctrl, track-mjx policy gradients, sim-to-real |
+| **Differentiable simulation** (optional) | Final projects | Validated dynamics gradients and control studies; not required by standard PPO |
 
 ## Package Details
 
@@ -231,11 +258,10 @@ After the 13 assignments, students have the foundation for the full stack:
 
 | Package | Why excluded |
 |---------|-------------|
-| PyBullet | The thing we're replacing |
-| DEAP | Course pedagogy requires implementing EA from scratch |
-| PyTorch / TensorFlow | JAX is the natural fit for MJX; adding torch creates confusion |
-| Isaac Gym/Lab | Requires NVIDIA GPU, closed-source core, overkill for pedagogy |
-| pyrosim | Legacy wrapper — students should learn the real API |
+| PyBullet / pyrosim | Historical course references; current examples use MuJoCo directly |
+| DEAP | The introductory course implements basic search; evosax/QDax supply advanced JAX comparisons |
+| PyTorch / TensorFlow | Separate comparison runtimes; modern Playground's PyTorch/Warp stack needs its own environment |
+| Isaac Lab | Optional future NVIDIA reference, outside the current matched-task plan |
 
 ## Resources
 
@@ -259,6 +285,12 @@ After the 13 assignments, students have the foundation for the full stack:
 - [r/ludobots wiki](https://www.reddit.com/r/ludobots/wiki/index) — Bongard's course content
 - [Josh Bongard's YouTube](https://www.youtube.com/@joshbongard3314) — lecture recordings
 - [evosax](https://github.com/RobertTLange/evosax) — JAX-native evolutionary strategies
+- [QDax](https://github.com/adaptive-intelligent-robotics/QDax) — quality-diversity and behavior repertoires
+- [Revolve2](https://github.com/ci-group/revolve2) — modular robot body/brain evolution
+- [EvoRL](https://github.com/EMI-Group/evorl) — evolutionary reinforcement learning
+- [TensorNEAT](https://github.com/EMI-Group/tensorneat) — evolving neural topology
+- [EvoGym](https://github.com/EvolutionGym/evogym) — soft voxel-body/control benchmarks
+- [RoboMorph](https://github.com/kevinxqiu/robomorph) — LLM-guided morphology proposals
 
 ### Active Inference & RL
 - [spinning-up-alf](https://github.com/m9h/spinning-up-alf) — 17-module RL → AIF curriculum

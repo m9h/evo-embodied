@@ -1,7 +1,7 @@
 [project]
 name = "evo-embodied"
 version = "0.1.0"
-description = "Modern evolutionary robotics environment: MuJoCo + MJX + JAX replacing pyrosim/pybullet"
+description = "Evolutionary robotics and embodied intelligence with MuJoCo/MJX, JAX, and reproducible research comparisons"
 requires-python = ">=3.12"
 dependencies = [
     # Matched physics versions, validated with the corrected model settings.
@@ -20,8 +20,10 @@ dependencies = [
 [project.optional-dependencies]
 gpu = ["jax[cuda13]>=0.12.0.1,<0.13; sys_platform == 'linux'"]
 strategies = ["evosax>=0.3.2,<0.4"]
+# Released MAP-Elites baseline; advanced QD/RL algorithms require separate validation.
+qd = ["qdax==0.5.0"]
 rl = ["brax==0.14.2", "dm_control==1.0.51"]
 # Playground 1.0 moves to PyTorch/Warp; preserve the JAX/MJX baseline.
 demos = ["playground==0.2.0", "onnxruntime>=1.31.1,<2"]
 llm = ["openai>=3.46.0,<4"]
-full = ["evo-embodied[gpu,strategies,rl,demos,llm]"]
+full = ["evo-embodied[gpu,strategies,qd,rl,demos,llm]"]

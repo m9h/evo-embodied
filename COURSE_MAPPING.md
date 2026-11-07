@@ -329,13 +329,15 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 **Goal:** Train the same robot with PPO and compare to evolution.
 
 **Exercise:**
-1. Train a Brax ant with PPO: `examples/00_reference_demos.py --brax-ant` (~3 min)
-2. Compare: RL produces smooth gaits in minutes. Evolution took hours and fitness engineering.
-3. Why? RL uses **gradients** — it knows which direction to improve. Evolution uses **random mutation** — it has to stumble upon improvements.
-4. But evolution has advantages: no differentiability required, can optimize morphology (not just controllers), naturally parallel, works with any fitness function
-5. Read: the evo-embodied README's "Phase 3: Beyond Bongard" table for concrete next steps
+1. Inspect or train the pinned reference with `uv run --locked --extra rl python examples/00_reference_demos.py --brax-ant`. Its full budget is 20M steps; runtime is measured on your hardware.
+2. Build the matched-task adapter described in B1 of [the validation plan](docs/VALIDATION_PLAN.md). Compare PPO, random search, hill climbing and evosax using the same robot, observations, actions, reset, reward and charged transition budget. A Brax Ant versus our custom quadruped is not that comparison.
+3. Explain the gradient distinction: PPO differentiates its policy/value losses, not the simulator. Evolution estimates or searches for improvements from sampled evaluations; its efficiency must be measured rather than assumed.
+4. Run `examples/12_quality_diversity.py` with the `qd` extra and compare MAP-Elites with equal-budget random search. Explain why archive coverage, QD score and best fitness answer different questions. This analytic arm is an integration exercise, not evidence of robot locomotion.
+5. Propose an EvoRL evolution-plus-learning arm with explicitly charged inner updates, then follow [project choices](docs/PROJECT_CHOICES.md) for the reference runtime boundary.
 
-**What students learn:** Evolution and RL are complementary, not competing. Evolution excels at open-ended design spaces (morphology, novel fitness landscapes). RL excels at policy optimization for known embodiments.
+**What students learn:** Search, quality-diversity and reinforcement learning can
+be combined. Establish their task-specific tradeoffs with controlled experiments
+and independent seeds before making efficiency or adaptation claims.
 
 ---
 
@@ -354,7 +356,10 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
   - 07: LLM proposes robot morphologies (outer loop: body, inner loop: controller)
   - 08: LLM generates the evolutionary algorithm itself (meta-evolution)
 
-**D. Cortical control** — Connect bl1 (spiking neural network with STDP) as the controller instead of a feedforward network. The "brain" learns via spike-timing-dependent plasticity rather than evolved weights.
+**D. Development and cortical control** — Plan a devograph/hgx or bl1 adapter with
+the same sensory/motor interface as fixed-network and TensorNEAT comparators.
+Separate inherited weights/topology from within-lifetime growth or STDP. Include
+growth-disabled and plasticity-disabled controls; these adapters are future work.
 
 **E. Soft-body co-design with control analysis** — A planned research extension,
 tracked as B5-B7 in [the validation plan](docs/VALIDATION_PLAN.md). The pairing is

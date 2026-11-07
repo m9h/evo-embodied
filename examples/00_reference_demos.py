@@ -1,18 +1,18 @@
 """Reference demonstrations: see what good locomotion looks like.
 
 Before evolving your own controllers, watch trained agents walk.
-This script trains Brax policies or inspects MuJoCo Playground environments.
+This script trains pinned Brax reference policies or inspects Playground 0.2
+JAX environments. Current Playground uses PyTorch/Warp; see docs/PROJECT_CHOICES.md.
 
 ## Brax training (requires the rl extra):
-    uv run python examples/00_reference_demos.py --brax-ant
+    uv run --locked --extra rl python examples/00_reference_demos.py --brax-ant
 
 ## With demo extras:
-    uv sync --extra demos
-    uv run python examples/00_reference_demos.py --playground-go1
+    uv run --locked --extra demos python examples/00_reference_demos.py --playground-go1
 
 ## Available demos:
 
-  --brax-ant         Train a walking ant in ~3 min with PPO (brax, in rl extra)
+  --brax-ant         Train a walking ant with PPO (brax, in rl extra)
   --brax-humanoid    Train a walking humanoid with PPO (brax, in rl extra)
   --playground-go1   Inspect Unitree Go1 environment (playground, in demos extra)
   --playground-g1    List Unitree G1 environments (playground, in demos extra)
@@ -27,31 +27,29 @@ from pathlib import Path
 os.environ.setdefault("MUJOCO_GL", "egl")
 
 
-def demo_brax_ant(render=True):
-    """Train a Brax ant to walk in ~3 minutes, then render it.
+def load_brax_reference(name):
+    """Retain pinned legacy tasks, with the maintained PPO callable and MJX physics."""
+    from brax import envs
+    from brax.training.agents.ppo.train import train
+    return envs.get_environment(name, backend="mjx"), train
 
-    This is the fastest path to "see a robot learn to walk."
-    Brax's PPO implementation + MJX backend = 50M timesteps in minutes.
-    """
+
+def demo_brax_ant(render=True):
+    """Train the pinned Brax Ant reference with PPO, then optionally render it."""
     try:
-        import brax
+        env, ppo_train = load_brax_reference("ant")
     except ImportError:
         print("Install brax: uv sync --extra rl")
         return
 
     import jax
-    from brax import envs
-    from brax.training.agents.ppo import train as ppo_train
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     print(f"JAX: {jax.default_backend()}, {jax.devices()}")
     print("\n=== Training Brax Ant with PPO ===")
-    print("This takes ~3 min on GPU, ~10 min on CPU.\n")
-
-    # Create environment
-    env = envs.get_environment("ant")
+    print("Budget: 20M environment steps; runtime and learned behavior must be measured.\n")
 
     # Track progress
     progress = []
@@ -106,20 +104,16 @@ def demo_brax_ant(render=True):
 def demo_brax_humanoid(render=True):
     """Train a Brax humanoid to walk."""
     try:
-        import brax
+        env, ppo_train = load_brax_reference("humanoid")
     except ImportError:
         print("Install brax: uv sync --extra rl")
         return
 
     import jax
-    from brax import envs
-    from brax.training.agents.ppo import train as ppo_train
 
     print(f"JAX: {jax.default_backend()}, {jax.devices()}")
     print("\n=== Training Brax Humanoid with PPO ===")
-    print("This takes ~5-10 min on GPU.\n")
-
-    env = envs.get_environment("humanoid")
+    print("Budget: 50M environment steps; runtime and learned behavior must be measured.\n")
 
     def progress_fn(num_steps, metrics):
         reward = metrics["eval/episode_reward"]
@@ -239,8 +233,8 @@ def list_demos():
     print(f"  {'Demo':<25s} {'Extra needed':<20s} {'Description'}")
     print(f"  {'-'*25} {'-'*20} {'-'*40}")
     demos = [
-        ("--brax-ant", "rl", "Train walking ant in ~3 min (PPO)"),
-        ("--brax-humanoid", "rl", "Train walking humanoid in ~10 min (PPO)"),
+        ("--brax-ant", "rl", "Pinned Ant PPO reference (20M steps)"),
+        ("--brax-humanoid", "rl", "Pinned Humanoid PPO reference (50M steps)"),
         ("--playground-go1", "demos", "Inspect Go1 environment"),
         ("--playground-g1", "demos", "List G1 environments"),
     ]
@@ -251,6 +245,9 @@ def list_demos():
     print("  uv sync --extra rl       # brax + dm_control")
     print("  uv sync --extra demos    # mujoco-playground + onnxruntime")
     print("  uv sync --extra full     # everything")
+    print("\nQuality-diversity example (analytic planar arm, no MuJoCo rollout):")
+    print("  uv run --locked --extra qd python examples/12_quality_diversity.py --output /tmp/qd-arm.json")
+    print("\nProject/backend choices and external comparisons: docs/PROJECT_CHOICES.md")
 
     print("\nExternal resources (no install needed, just browse):")
     print("  HuggingFace SB3 Zoo: https://huggingface.co/sb3")
@@ -266,9 +263,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Reference locomotion demos — see what good walking looks like")
     parser.add_argument("--brax-ant", action="store_true",
-                        help="Train a Brax ant to walk (~3 min)")
+                        help="Train the pinned Brax Ant reference (20M steps)")
     parser.add_argument("--brax-humanoid", action="store_true",
-                        help="Train a Brax humanoid to walk (~10 min)")
+                        help="Train the pinned Brax Humanoid reference (50M steps)")
     parser.add_argument("--playground-go1", action="store_true",
                         help="Inspect the Unitree Go1 environment")
     parser.add_argument("--playground-g1", action="store_true",

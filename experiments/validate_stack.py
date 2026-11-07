@@ -102,16 +102,31 @@ CHECKS = {
         assert int(state.generation_counter) == 2
         print('CMA-ES: two ask/evaluate/tell generations passed')
     """,
+    "qdax": """
+        import runpy
+        run = runpy.run_path('examples/12_quality_diversity.py')['run_comparison']
+        first = run(seed=0, population=16, generations=2, joints=4, bins=4)
+        repeat = run(seed=0, population=16, generations=2, joints=4, bins=4)
+        assert first == repeat, 'Seeded analytic QD run must repeat exactly on this backend'
+        assert all(m['candidate_evaluations'] == 48 for m in first['methods'].values())
+        print('QDax MAP-Elites/random search: kinematic fixtures, elite replay, equal budgets, repeatability passed')
+    """,
     "brax": """
+        import runpy
         import jax
         import jax.numpy as jnp
         import numpy as np
-        from brax import envs
-        env = envs.get_environment('ant', backend='mjx')
+        load = runpy.run_path('examples/00_reference_demos.py')['load_brax_reference']
+        env, train = load('ant')
         state = jax.jit(env.reset)(jax.random.key(0))
         state = jax.jit(env.step)(state, jnp.zeros(env.action_size))
         assert np.isfinite(float(state.reward)) and np.isfinite(state.obs).all()
-        print('Brax Ant MJX reset/step passed')
+        make_policy, params, _ = train(environment=env, num_timesteps=0,
+            num_envs=1, num_eval_envs=1, episode_length=16, batch_size=1,
+            num_minibatches=1, unroll_length=2, use_pmap_on_reset=False)
+        action, _ = jax.jit(make_policy(params))(state.obs, jax.random.key(1))
+        assert action.shape == (env.action_size,) and np.isfinite(action).all()
+        print('Brax Ant MJX reset/step and PPO policy construction/inference passed; no training updates')
     """,
     "dm_control": """
         import numpy as np

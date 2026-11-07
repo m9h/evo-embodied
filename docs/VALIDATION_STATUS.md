@@ -1,6 +1,6 @@
 # Observed validation status
 
-Review date: 2026-11-06. Base revision:
+Original physics review: 2026-11-06. Base revision:
 `fde9fc82d41b4aff541df86d023a80d1e43805e7`.
 
 Dependency follow-up: [the upgrade report](DEPENDENCIES.md) records the adopted
@@ -13,9 +13,36 @@ Tightening Bittle's solver tolerance resolves its 4.0 replay regression through
 solver tolerance alone does not fix; see the upgrade report's remaining gates.
 The original versions, model settings and raw reports below remain historical evidence.
 
+Ecosystem integration refresh, **2026-11-07**:
+
+- Added [project/backend decisions](PROJECT_CHOICES.md) and source-pinned roles
+  for QDax, Revolve2, EvoRL and TensorNEAT. Only QDax was newly installed; the
+  other three remain planned adapters with explicit acceptance criteria.
+- Added QDax 0.5.0 as optional `qd`/`full` dependencies. All 214 installed packages
+  pass `uv pip check`; the prior MuJoCo/JAX versions and model XMLs are unchanged.
+- The [ten-check integration report](validation/stack-ecosystem.json) passes,
+  including QD archive replay/repeatability and Brax PPO policy construction and
+  inference. PPO optimization, viewers and physical robot deployment were not run.
+- The [three-seed arm report](validation/qdax-arm-integration.json) records
+  192 candidate evaluations per method/seed, plus separately counted fixtures
+  and elite replay. It contains occupied genomes/descriptors and histories.
+
+| Seed | MAP-Elites coverage / QD score | Random-search coverage / QD score |
+|---|---|---|
+| 0 | 43.75% / 8.8933 | 50.00% / 10.3010 |
+| 1 | 56.25% / 12.8023 | 46.875% / 9.7667 |
+| 2 | 67.1875% / 15.0389 | 48.4375% / 10.1353 |
+
+This is the upstream analytic planar arm with an 8×8 grid and fitness offset
+0.5. The small integration run is not a superiority study; random search wins
+seed 0. It does not exercise MuJoCo contacts, solve the open physics gates or
+validate the planned dynamic-robot QD adapter. This integration run does not
+retest or clear the existing physics failures; their November 6 model and
+runtime versions remain recorded below and in the dependency report.
+
 **Current conclusion:** the project is a promising experiment substrate with
 simulation and training examples. Competitive research performance and paper reproduction have
-not been established. The newly added physics probe produces an actionable
+not been established. The physics probes retain an actionable
 failure on the quadruped and passes the tested Bittle cases. The current
 quadruped reset has 1 cm ground clearance; settling and the remaining evaluator
 issues still need work. These checks are part of B0, not completed platform

@@ -1,7 +1,7 @@
 # Validation plan for a competitive research platform
 
-Status: proposed experiments, reviewed 2026-11-06. Small engine replay,
-dependency integration and float32 batching probes have been implemented and
+Status: proposed experiments, refreshed 2026-11-07. Small engine replay,
+dependency integration, float32 batching and analytic quality-diversity probes have been implemented and
 run; see [observed results](VALIDATION_STATUS.md) and [upgrade evidence](DEPENDENCIES.md).
 [RESEARCH_COMPARISONS.md](RESEARCH_COMPARISONS.md) identifies papers, code, and
 version boundaries. A demonstration video is not a validation result.
@@ -19,6 +19,9 @@ version boundaries. A demonstration video is not a validation result.
 Passing one claim does not establish the others. Report the tasks and budgets on
 which a claim holds; do not infer general superiority over EvoGym or biological
 validity from a few successful agents.
+Backend and project selection now follow [PROJECT_CHOICES.md](PROJECT_CHOICES.md).
+Revolve2/EvoRL/TensorNEAT remain reference-adapter work; only the bounded QDax
+planar-arm integration has been added to the executable comparison surface.
 
 ## P0: audit findings to resolve before training comparisons
 
@@ -49,7 +52,8 @@ and localize its first acceleration difference; a tighter solver alone did not
 resolve it. This remains open even though the original upgrade blockers pass.
 
 Hardware deployment, paid LLM evolution, long GPU jobs, and reference-platform
-installation are outside this planning run. No experiment below has been silently
+campaigns are outside this planning run. The optional QDax integration was
+installed and checked locally. No experiment below has been silently
 scheduled. Small local physics probes are recorded separately.
 
 ## Shared experiment contract
@@ -167,6 +171,41 @@ First compare search methods on the same feedforward policy class. PPO is a
 separate algorithm comparison with its architecture/normalization budget recorded.
 Add a pinned MuJoCo Playground locomotion task only after reproducing its upstream
 PPO baseline; do not compare its native reward with this repo's custom score.
+Preserve the JAX `rss2025`/0.2 task lineage. Current PyTorch/Warp Playground is a
+separate backend comparison, not an interchangeable dependency update. Brax
+training can supply PPO, but its legacy physics/environment wrappers are not the
+foundation for new task definitions. Standard PPO needs policy gradients, not
+derivatives through MuJoCo.
+
+### B1-QD: behavior repertoires
+
+**Implemented integration fixture:** `examples/12_quality_diversity.py` compares
+QDax 0.5.0 MAP-Elites and random search on the upstream analytic planar arm.
+The integration run uses seeds 0/1/2, 32 initial candidates and five
+32-candidate generations, or 192 search evaluations per method/seed. It saves
+occupied elites and metrics and checks analytic poses, replay and elitism. This
+is not a dynamic-robot benchmark and does not complete B0 or B1.
+
+**Next robot adapter, after B0:** use the same Bittle policy class and objective
+as the weight-search baseline. Start with a 10×10 archive of left/right foot
+contact duty factors in [0,1]; define the sensor aggregation, force threshold
+and sampling period in the task config before collecting comparisons. Validate
+the descriptors against hand-checked contact traces. Use identical initial
+populations and archive insertion for MAP-Elites, random search and hill-climber
+candidate streams. Include every evaluated candidate in the charged budget.
+
+Use the B1 pilot/confirmation budgets below for each method. Report archive
+coverage, QD score with a frozen return offset, best return, failure rate and
+held-out reevaluation of every occupied cell. Recompute corrected coverage and
+QD score from held-out descriptors/returns: training archive size alone is not
+robustness evidence. Charge archive reevaluation separately and equally.
+
+**Later EvoRL arm:** compare evolution alone, RL alone and one pinned ERL/CEM-RL
+workflow on that same task. Hold architecture and observation access fixed;
+report transitions, optimizer updates, compilation and wall time. Freeze the
+inner learning budget and parent/candidate evaluation panel before confirmation.
+
+### B1 budgets and outcome measures
 
 Pilot: 3 seeds x 64 candidates x (20 generations + initialization) = 4,032
 training rollouts per search method/task, each 100 control steps x 20 physics
@@ -306,6 +345,27 @@ quality target. Save all bodies, policies and top-of-generation snapshots.
 Generalization requires a separately specified held-out perturbation/terrain
 suite; tuning on Walker and reporting only Walker is an in-task result.
 
+### B6-R: Revolve2 modular body/brain comparison
+
+This is a rigid modular-robot study alongside EvoGym's soft-voxel study, with
+separate scores and task definitions. Pin the Revolve2 snapshot in the catalog
+and lock its own Python environment. Export one upstream gecko body, its CPG
+parameters, actuator ranges, terrain, reset and integration/control periods.
+First replay the same commands in that worker and an evo-embodied adapter; do
+not replace the CPG with an MLP during this equivalence check.
+
+Then compare random-valid-body search, the upstream body/brain EA and one local
+outer optimizer with the same CPG inner learner and module-count cap. Initial
+pilot: 3 seeds × 10 unique bodies × 32 controller candidates × 5 generations
+(including initialization in those five batches) = 4,800 controller rollouts per
+outer method, plus explicitly charged held-out evaluation. Freeze episode length
+after measuring the fixed-body fixture; charge rejected/duplicate proposals and
+recompilation separately. Save body encodings, compiled model hashes, controllers
+and trajectories. Confirmation budgets follow the common independent-seed plan.
+
+**Exit:** matched fixed-body traces, repeatable worker results, complete cost
+accounting, and held-out terrain results before any morphology-search claim.
+
 **Exit:** reproduce the reference pipeline, then pass the frozen non-inferiority
 criterion at matched resources. Later extend to `CaveCrawler-v0` and a manipulation
 task to test whether gains extend beyond easy locomotion; report those separately.
@@ -358,6 +418,11 @@ match maximum nodes/parameters as well as sensory access. Evaluate adaptation to
 unseen worlds, forgetting, topology changes and behavior together. Ten training
 seeds x 20 held-out worlds is the initial confirmation design, subject to pilot
 power analysis. This addresses the paper's future direction; it is a new study.
+Use TensorNEAT as the explicit topology-evolution comparator after locking its
+runtime and verifying a fixed input/output network fixture. Add QDax archives
+only with a shared behavior descriptor; separate selecting diverse controllers
+from demonstrating within-lifetime adaptation. EvoRL provides a later learned-
+controller comparison, with its inner learning cost charged to the same budget.
 
 ## Implementation sequence and deliverables
 
@@ -367,10 +432,10 @@ power analysis. This addresses the paper's future direction; it is a new study.
 | PR-B: experiment runner and reporting | PR-A | Versioned configs, full seed control, cost accounting, checkpoint-resume equivalence, held-out evaluator, JSONL/NPZ report command |
 | PR-C: B2/B4 planar references | PR-B | Exported upstream fixtures, equation/code discrepancy log, original-versus-port plots, seed-level results |
 | PR-D: B3 learning reference | PR-C infrastructure | Stationary-update tests, acquisition/replacement experiments and forgetting curves |
-| PR-E: B1 and B5 baselines | PR-B | Matched search/PPO contracts, timing curves, pinned EvoGym worker, fixed-body baseline report |
-| PR-F: B6 co-design | PR-E | Historical reproduction report and separate modern comparison; body/policy archive and complete costs |
+| PR-E: B1, B1-QD and B5 baselines | PR-B | Matched evosax/QDax/random/PPO contracts, corrected archive metrics, timing curves, pinned EvoGym worker and fixed-body report; analytic QDax integration is already available |
+| PR-F: B6/B6-R co-design | PR-E | EvoGym historical/modern reports; isolated Revolve2 fixed-body parity, body/policy archives and complete costs |
 | PR-G: B7 controlled identification | PR-F | DMDc oracle check, held-out prediction and nonlinear disturbance-recovery ablations |
-| PR-H: B8/B9 extensions | Relevant reference gate | Preregistered ablations and evidence for a scoped new research claim |
+| PR-H: B8/B9 extensions | Relevant reference gate | TensorNEAT/EvoRL runtime checks, preregistered developmental/plasticity/LLM ablations and evidence for a scoped new claim |
 
 The first useful release should contain PR-A through PR-C and PR-E, with a public
 failure ledger. PR-D/F/G then establish the developmental-learning and co-design

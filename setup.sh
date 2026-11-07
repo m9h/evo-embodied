@@ -20,11 +20,11 @@ if lspci 2>/dev/null | grep -qi nvidia; then
     echo "      uv sync --extra gpu"
     echo "    Ensure drivers are installed: sudo dnf install akmod-nvidia (RPM Fusion)"
 elif lspci 2>/dev/null | grep -qi 'amd.*radeon\|amd.*navi\|amd.*vega'; then
-    echo ">>> AMD GPU detected. JAX ROCm support is experimental."
-    echo "    CPU MJX is still fast — 100x speedup over serial PyBullet."
+    echo ">>> AMD GPU detected. Configure a compatible JAX ROCm environment separately."
+    echo "    Use the CPU profile first; validate a compatible ROCm profile separately."
 else
     echo ">>> No discrete GPU detected — CPU-only mode."
-    echo "    MJX on CPU still parallelizes via JAX vmap — significant speedup over PyBullet."
+    echo "    Compare native CPU and batched MJX timings on your actual workload."
 fi
 echo ""
 

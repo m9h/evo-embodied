@@ -1,6 +1,7 @@
 # Dependency compatibility and upgrade evidence
 
-Reviewed 2026-11-06 (America/Los_Angeles). Runtime checks ran on macOS arm64,
+Physics upgrade reviewed 2026-11-06; ecosystem integration refreshed 2026-11-07
+(America/Los_Angeles). Runtime checks ran on macOS arm64,
 Python 3.12.13, with CPU JAX unless explicitly marked MPS. This is a dependency
 upgrade with bounded integration checks, not competitive research validation.
 
@@ -20,13 +21,14 @@ The main environment intentionally does not select every latest release.
 | ipykernel | 7.2.0 | 7.4.0 | Updated |
 | ipywidgets | 8.1.8 | 8.1.9 | Updated |
 | evosax | 0.2.0 | 0.3.2 | CMA-ES ask/evaluate/tell smoke passes |
+| QDax | Not installed | **0.5.0** | Optional `qd` extra; released MAP-Elites and random-search arm integration passes |
 | Brax | 0.14.2 | 0.14.2 | Already current; Ant MJX reset/step passes |
 | dm-control | 1.0.38 | **1.0.51** | MuJoCo 4.0-compatible; Cartpole reset/step passes |
 | Playground | 0.2.0 | **0.2.0** | Preserve the JAX/MJX reference suite |
 | ONNX Runtime | 1.24.4 | 1.31.1 | CPU provider available; no policy inference tested |
 | OpenAI SDK | 2.29.0 | 3.46.0 | Client construction/chat interface checked; no requests sent |
 
-The resolver also updates transitive packages. Flax remains at 0.12.8. All 196
+The resolver also updates transitive packages. Flax remains at 0.12.8. All 214
 installed packages in the full macOS research environment pass `uv pip check`.
 The main environment was rebuilt cleanly for MuJoCo 4.0's split core/studio
 packaging. The former JAX 0.10.2 environment is preserved locally in the ignored
@@ -38,7 +40,7 @@ Run from the repository root:
 
 ```bash
 uv sync --locked                   # core CPU environment
-uv sync --locked --extra full      # includes strategies, RL, demos and LLM client
+uv sync --locked --extra full      # includes strategies, QD, RL, demos and LLM client
 uv pip check
 uv run --locked --extra full python experiments/validate_stack.py \
   --research --output /tmp/evo-stack.json
@@ -169,13 +171,15 @@ The [128-step](validation/physics-modern-fixed-128.json) and
 [512-step](validation/physics-modern-fixed-512.json) reports record the remaining
 physics failures and correctly exit **1** overall. Physics checks now also reject
 penetrating resets and report the first failing timestep per field. Passing the
-nine dependency smoke checks is not a claim that the full physics gate passes.
+dependency smoke checks is not a claim that the full physics gate passes.
 
 Historical failures remain available: [4.0 candidate](validation/physics-mujoco4-candidate-128.json),
 [JAX 0.12 candidate](validation/stack-jax012-candidate.json), and the
 [previous adopted 128-step replay](validation/physics-updated-128-steps.json).
 Isolated comparison reports record installed versions independently of the
-checkout lock hash; the main environment's final reports use the current lock.
+checkout lock hash. The November 6 main-environment reports match the lock at
+`b7b4226`; the November 7 QDax integration changes the lock by adding optional
+dependencies, with no changes to the installed MuJoCo/JAX versions or model XMLs.
 
 ## Playground reference compatibility
 
@@ -223,11 +227,23 @@ installing its latest release into the main environment.
 
 ## Acceptance and next update
 
-The [modern dependency smoke report](validation/stack-modern-fixed.json) passes
-all nine checks, including the expanded 12-case batching gate. It covers compiled
-numerical operations, image output/notebook imports, CMA-ES, Brax, dm-control,
-Playground and client interfaces. It does not launch a notebook kernel, render a
-physics viewer, run ONNX inference, train PPO or call an LLM service.
+The [ecosystem integration report](validation/stack-ecosystem.json) passes all ten
+checks, including the 12-case batching gate and new QDax archive checks. It also
+constructs a Brax PPO policy and runs inference using the corrected callable;
+there are no PPO optimization updates. The preceding
+[nine-check report](validation/stack-modern-fixed.json) remains historical evidence.
+Neither run launches a notebook kernel, renders a physics viewer, runs ONNX
+inference or calls an LLM service.
+
+The `qd` extra pins released QDax 0.5.0, which adds 18 installed packages on this
+Mac without changing the previous packages. Its core MAP-Elites/planar-arm path
+passes on JAX 0.12. [Three-seed raw results](validation/qdax-arm-integration.json)
+include equal candidate budgets, elite replay and both MAP-Elites and random
+archives. The full stack probe also checks exact seeded repeatability.
+QDax's optional research ecosystem includes Jumanji and TensorFlow Probability;
+their advanced task/actor-critic paths were not validated by this fixture.
+Keep them out of the core-only environment by omitting `--extra qd`/`--extra full`.
+See [integration scope](PROJECT_CHOICES.md#runnable-quality-diversity-baseline).
 
 For the next upgrade, resolve in a fresh environment, run dependency checks plus
 both physics horizons and the longer batching diagnostic, and compare against

@@ -1,10 +1,13 @@
 # Research demonstrations and comparison projects
 
-Reviewed 2026-11-06 against evo-embodied commit
-`fde9fc82d41b4aff541df86d023a80d1e43805e7`. This is a source-backed comparison
+Paper mapping reviewed 2026-11-06 against `fde9fc8`; ecosystem choices refreshed
+2026-11-07 from evo-embodied `b7b4226` and the upstream snapshots below.
+This is a source-backed comparison
 catalog, not a list of reproduced results. Execution protocols, budgets, and
 decision rules are in [VALIDATION_PLAN.md](VALIDATION_PLAN.md); observed local
 results are in [VALIDATION_STATUS.md](VALIDATION_STATUS.md).
+The integration decisions and runnable QDax example are described in
+[PROJECT_CHOICES.md](PROJECT_CHOICES.md).
 
 ## What each comparison can establish
 
@@ -30,6 +33,9 @@ applications; they are not benchmark results to claim reproduced.
 | Project | Use | Fair-comparison boundary |
 |---|---|---|
 | [evosax](https://github.com/RobertTLange/evosax/tree/e493325ec25e59350cce17f546f2e994971c958d) | CMA-ES/OpenES and GA alternatives to the current parallel hill climber | Same weights/encoding, initial-state distribution, action/observation contract, and charged evaluations; a categorical voxel decoder must be specified and audited |
+| [QDax 0.5.0](https://github.com/adaptive-intelligent-robotics/QDax/tree/v0.5.0) | MAP-Elites and behavior archives for B1/B9; analytic planar-arm integration is runnable now | Shared descriptor definition/grid, return offset, initial population and candidate budget; report coverage, QD score and best return, plus held-out archive reevaluation |
+| [Revolve2](https://github.com/ci-group/revolve2/tree/8156a66624f96c43cdfcec05bbb366cc492b87e0) | Modular body/brain evolution and CPG controllers; B6 rigid-body companion to EvoGym | Preserve module geometry, actuator semantics, terrain, controller learning budget and morphology encoding; equal simulator branding does not make tasks identical |
+| [EvoRL](https://github.com/EMI-Group/evorl/tree/43258389445ca18a9c8c47660301aa3071481951) | ERL/CEM-RL and population-based training comparisons in B1/B9 | Match environment transitions, architectures and held-out evaluation; count inner RL updates and population replacement costs; isolate the broader training dependencies |
 | [TensorNEAT](https://github.com/EMI-Group/tensorneat/tree/ee204900e8e55ffe0ed756651ea871c70230dd34), [NEAT-Python](https://github.com/CodeReclaimers/neat-python) | Topology-evolution baselines for B2 and B9 | Separate weight-only from topology-changing search; account for parameter/node limits and total evaluations |
 | [EvoGym modern snapshot](https://github.com/EvolutionGym/evogym/tree/f63c649c688adda1accad5f86731aad96606388a), [examples](https://github.com/EvolutionGym/evogym/blob/f63c649c688adda1accad5f86731aad96606388a/examples/README.md) | Maintained task interface; GA, BO, CPPN-NEAT plus PPO baselines | Upstream explicitly directs exact paper reproduction to release 1.0.0; modern runs get a separate results table |
 | [PyDMD / DMDc](https://pydmd.github.io/PyDMD/dmdc.html), [source snapshot](https://github.com/PyDMD/PyDMD/tree/024464ff667e4b0226f9ecbe933bc67f3fe21e81) | Independent controlled-system identification reference for B7 | Fit from state **and input** histories; autonomous exact DMD does not identify an actuator matrix B |
@@ -38,12 +44,31 @@ applications; they are not benchmark results to claim reproduced.
 | [JaxMARL](https://github.com/bold-lab-ai/JaxMARL) | Multi-agent learning comparisons after B4 | Learned cooperation/communication is an extension; it cannot validate the paper's fixed-wiring collective model |
 | [SoftZoo](https://github.com/zswang666/softzoo), [RoboDiff](https://github.com/robodiff/robodiff) | Later soft-material/differentiable design comparisons | Different constitutive/contact models; use their native tasks and reference configurations, not cross-engine raw-return rankings |
 | [OpenWorm](https://github.com/openworm/OpenWorm) | Later biological connectome-to-body comparison | Different scale, mechanics, and biological evidence; not an initial locomotion leaderboard baseline |
+| [EvoJAX](https://github.com/google/evojax/tree/acf5252475e4fbf47e0e3f7994c03de11dd3c4ca) | Historical accelerator-based neuroevolution reference | Upstream archived; no new core dependency or assumption of current JAX compatibility |
 
 Snapshots above identify inspected source, not validated dependency locks. Every
 actual run must record its resolved commit, submodules, patches, package versions,
 license, and environment lock. Do not upgrade a reference midway through a study.
 Retain attribution when adapting code; review dependency/license compatibility
-before distributing a combined implementation (TensorNEAT is GPL-3.0).
+before distributing a combined implementation (TensorNEAT/EvoRL report GPL-3.0;
+Revolve2 reports LGPL-3.0). No code from those three projects is vendored here.
+
+## Integration state at the ecosystem refresh
+
+| Reference | Reviewed version/source | Local state |
+|---|---|---|
+| QDax | Released **0.5.0**, exact wheel locked; development [snapshot](https://github.com/adaptive-intelligent-robotics/QDax/tree/46b8feecae26d79414ce7a1ce731e5cfbeb9837d) identifies itself as 0.5.1 | `qd` extra and `examples/12_quality_diversity.py` use the release, not development source |
+| Revolve2 | `8156a66624f96c43cdfcec05bbb366cc492b87e0` | Source review only; worker environment and adapter pending |
+| EvoRL | `43258389445ca18a9c8c47660301aa3071481951` | Source/metadata review only; workflow and dependency lock pending |
+| TensorNEAT | `ee204900e8e55ffe0ed756651ea871c70230dd34` | Source review only; fixed sensory/motor interface and bounded topology adapter pending |
+| Current Playground | [Snapshot](https://github.com/google-deepmind/mujoco_playground/tree/24a071343e380eb739a053650a9d12bf530cc92c) uses PyTorch, `reaf-sim` and Warp | Separate future runtime; installed 0.2.0 remains the JAX reference |
+
+QDax's planar arm is an analytic fixture with no contact dynamics. It validates
+archive/search integration while the MuJoCo B0 gate stays open. Other QDax
+algorithms and upstream environments are not covered by this test. Brax's
+[maintenance notice](https://github.com/google/brax) limits active maintenance to
+training: retain its pinned legacy demos for reference, but use direct MJX or
+the preserved Playground JAX tasks when defining new robot experiments.
 
 ## Existing m9h components
 
