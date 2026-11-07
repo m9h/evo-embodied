@@ -24,28 +24,36 @@ coordinated gait.
 
 ## Three Principles of Locomotion Fitness
 
-### 1. Reward Velocity, Not Distance
+### 1. Measure Sustained, Healthy Progress
 
 ```python
-# BAD: rewards a single leap
-fitness = final_x_position
+# Displacement alone does not distinguish walking from a launch or slide.
+displacement = final_x_position - initial_x_position
 
-# GOOD: rewards sustained forward movement
-fitness = mean(forward_velocity_at_each_timestep)
+# An example task-specific reward: progress only while healthy.
+fitness = mean(where(healthy_at_each_timestep, forward_velocity, 0.0))
 ```
 
-Distance rewards a single burst of speed. Velocity rewards *consistent* forward
-movement across the entire simulation. A robot that walks at 0.5 m/s for 8
-seconds scores the same as one that runs at 0.5 m/s — but a robot that leaps
-2m in the first second and sits still for 7 seconds scores much lower (mean
-velocity ≈ 0.25 m/s).
+At a fixed horizon T, time-averaged forward velocity is displacement divided by
+T (up to numerical sampling). Replacing distance by mean velocity alone does
+not change the ordering of trajectories and does not establish sustained gait.
+A 2 m leap and 2 m of walking over the same horizon have the same average speed.
 
-This single change is the most important fix.
+Example 09 changes the objective through a torso-height/uprightness health gate
+and a permanent unhealthy flag. Those are additional assumptions, not a property
+of velocity itself. Its height window is not a direct foot-contact test. Record
+progress in each quarter of the episode, contact type, airborne fraction, survival
+and uprightness to distinguish walking, hopping and sliding. Define the intended
+behavior before tuning: running can legitimately contain aerial phases.
 
-### 2. Penalize Energy (No Free Flailing)
+Reset conditions also matter: the current quadruped begins with ground penetration.
+Resolve that initial impulse before attributing launch behavior entirely to the
+reward. See [the validation findings](VALIDATION_STATUS.md).
+
+### 2. Penalize Effort and Measure Physical Work Separately
 
 ```python
-energy_cost = mean(sum(ctrl ** 2))  # squared torque at each timestep
+energy_cost = mean(sum(ctrl ** 2))  # command-effort proxy, not joules
 fitness -= ENERGY_WEIGHT * energy_cost
 ```
 
@@ -53,16 +61,18 @@ Without an energy penalty, the optimizer discovers that maxing out all motors
 all the time produces unpredictable chaotic motion — and sometimes that chaos
 happens to go forward. This is "flailing."
 
-The energy penalty makes large torques expensive. The optimizer must find
-*efficient* movements — which turn out to be rhythmic gaits, because gaits
-exploit the pendulum dynamics of swinging legs rather than fighting them.
+The proxy makes large commands expensive; it does not guarantee an efficient
+gait. Here motor gear ratios differ, and Bittle uses position/servo commands, so
+`ctrl ** 2` is not measured torque or energy. Log actual actuator generalized
+forces and velocities and integrate their absolute power for a mechanical-work
+diagnostic. Electrical energy requires an actuator/electrical model.
 
 **How to tune the weight:** Start with `ENERGY_WEIGHT = 0.005`. If the robot
 barely moves, reduce it. If it still flails, increase it. The energy penalty
 and velocity reward must be balanced — too much energy penalty produces a robot
 that stands still (minimum energy = zero torque).
 
-### 3. Penalize Jerk (Smoothness Matters)
+### 3. Penalize Command Variation
 
 ```python
 ctrl_change = sum((ctrl_t - ctrl_{t-1}) ** 2)
@@ -74,15 +84,22 @@ commands (bang-bang control) that are technically low-mean-energy but
 physically violent. The smoothness penalty makes rapid control changes
 expensive, forcing the controller to produce smooth, gradual commands.
 
-This is what turns twitching into walking. Smooth control naturally produces
-sinusoidal joint trajectories — which is exactly what a gait looks like.
+This discourages abrupt commands; it does not ensure walking or sinusoidal joint
+motion. A command-difference penalty is not mechanical jerk (the derivative of
+acceleration). Normalize time-dependent metrics when changing control frequency
+and report actuator/joint kinematics separately.
 
 ## The Full Fitness Function
+
+This is an illustrative decomposition, not the exact current implementation of
+every example. Example 09 adds a health gate and uprightness term, while the sweep
+runner still uses the older distance-based objective. Research comparisons need
+one versioned evaluator and separate component metrics.
 
 ```python
 fitness = (
     VELOCITY_WEIGHT * mean_forward_velocity      # go forward
-    - ENERGY_WEIGHT * mean_squared_torque          # don't flail
+    - ENERGY_WEIGHT * mean_squared_command         # effort proxy
     - SMOOTHNESS_WEIGHT * mean_ctrl_change         # don't twitch
     - HEIGHT_PENALTY_WEIGHT * mean_height_violation # don't fall
     + ALIVE_BONUS * n_alive_steps                  # survive
@@ -95,7 +112,7 @@ Each component addresses a specific failure mode:
 | Component | What it prevents | Typical weight |
 |-----------|-----------------|----------------|
 | `mean_forward_velocity` | Standing still | 1.0 |
-| `mean_squared_torque` | Flailing, chaotic motion | 0.005 |
+| `mean_squared_command` | Large commands (proxy) | 0.005 |
 | `mean_ctrl_change` | Twitching, bang-bang control | 0.1 |
 | `mean_height_violation` | Falling over | 5.0 |
 | `n_alive_steps` | Dying early (falling and not recovering) | 0.1 |
@@ -105,8 +122,9 @@ Each component addresses a specific failure mode:
 
 ### "The Leap"
 **Symptom:** Robot jumps forward, lands, doesn't move again.
-**Cause:** Distance reward, no velocity reward.
-**Fix:** Replace `x_distance` with `mean(x_velocity)`.
+**Possible causes:** Reward loophole, penetrating reset, or large initial forces.
+**Check:** Reset/contact dynamics and time-resolved progress. Mean velocity alone
+does not solve this at a fixed horizon; validate any added health/contact gate.
 
 ### "The Flail"
 **Symptom:** All joints move at maximum speed in random directions.
@@ -135,9 +153,10 @@ Each component addresses a specific failure mode:
 
 ### "The Bunny Hop"
 **Symptom:** Robot bounces forward using all four legs simultaneously.
-**Cause:** All legs are in phase (no phase diversity in clock signal).
-**Fix:** Add per-leg phase offsets to the clock signal, or increase
-the number of clock frequencies.
+**Possible cause:** The learned policy synchronizes contacts because the objective
+rewards that behavior. A shared clock does not force all output joints in phase.
+**Check:** Contact phase relationships and task criteria; compare controller
+structure and genuinely different frequencies under controlled ablations.
 
 ## Advanced: Multi-Frequency Clocks
 
@@ -162,9 +181,11 @@ for i, phase_offset in enumerate([0, π/2, π, 3π/2]):
     clock_cos_i = cos(2π * freq * t + phase_offset)
 ```
 
-This gives the controller enough information to produce trotting or walking
-gaits. Without phase offsets, the controller must discover these relationships
-purely from sensor feedback — which is possible but much slower.
+For a fully connected controller, shifted sine/cosine pairs at the same frequency
+are linear combinations of the original pair. They do not add independent timing
+information. Different frequencies or explicit leg-specific connectivity can
+change the representation. Any learning-speed benefit from redundant phase
+channels needs an ablation controlling parameter count and initialization.
 
 ## Comparison: Our Experiments
 

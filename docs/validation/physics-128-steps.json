@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "scope": "short open-loop replay; not paper reproduction or throughput evidence",
+  "created_utc": "2026-11-06T22:31:11.903270+00:00",
+  "git_commit": "fde9fc82d41b4aff541df86d023a80d1e43805e7",
+  "git_status": "?? experiments/mps_smoke.py\n?? experiments/validate_physics.py",
+  "runner_sha256": "f48cfba2e333a144655baa185138fdc90b3fdcf17970fa77821a07c2db85a4b3",
+  "lock_sha256": "bed59635ce1659617ea41ba9166059e9068d705765a3376858eca776a92dd828",
+  "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+  "python": "3.13.13",
+  "versions": {
+    "jax": "0.9.2",
+    "jaxlib": "0.9.2",
+    "mujoco": "3.6.0",
+    "mujoco-mjx": "3.6.0",
+    "numpy": "2.4.3"
+  },
+  "backend": "cpu",
+  "devices": [
+    "TFRT_CPU_0"
+  ],
+  "x64_enabled": true,
+  "atol": {
+    "qpos": 1e-06,
+    "qvel": 1e-05,
+    "sensordata": 0.0001
+  },
+  "rtol": 1e-05,
+  "models": [
+    {
+      "model": "models/quadruped.xml",
+      "model_sha256": "3587bfedb049ea8d406ed8e88d9c5fd3e266449b2591ca4d9bd70f5fbdf83037",
+      "steps": 128,
+      "timestep_s": 0.002,
+      "duration_s": 0.256,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": -0.12999999999999998,
+      "compile_s": 1.514499540993711,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 1.3387141414116254e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 1.1931225183006358e-07,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 1.327966679692022e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 4,
+          "cpu_rollout_s": 0.0006576250016223639,
+          "mjx_warm_rollout_s": 0.006301999994320795,
+          "passed": true
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "316056ba2b0153a0dd9e590046ee83e08ca5ae4b25d0f2f61f6831653dd87166",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 0.003284666500070421,
+              "within_tolerance": false,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 0.06051758499887683,
+              "within_tolerance": false,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 0.003284666500070421,
+              "within_tolerance": false,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 4,
+          "cpu_rollout_s": 0.0008418340003117919,
+          "mjx_warm_rollout_s": 0.008752624999033287,
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "models/bittle/bittle.xml",
+      "model_sha256": "ab637285c9f2caa9fa7714dc7a47c0d079c8d45395eeb28f8d290ade15ec4340",
+      "steps": 128,
+      "timestep_s": 0.002,
+      "duration_s": 0.256,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": null,
+      "compile_s": 1.7164444160007406,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 1.1982173170059281e-11,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 1.0775002071462545e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 1.8444519578331153e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.0009250419971067458,
+          "mjx_warm_rollout_s": 0.012736208009300753,
+          "passed": true
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "316056ba2b0153a0dd9e590046ee83e08ca5ae4b25d0f2f61f6831653dd87166",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 2.6367796834847468e-15,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 3.6415315207705135e-13,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 3.959144123655278e-11,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.0009423749870620668,
+          "mjx_warm_rollout_s": 0.014045374991837889,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": false
+}

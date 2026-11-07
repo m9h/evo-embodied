@@ -130,10 +130,8 @@ def parallel_hill_climber(
     print(f"Total simulations: {total_sims:,} ({total_sims/elapsed:.0f} sims/sec)")
     print(f"Best fitness: {best_ever:+.4f}")
 
-    # For comparison: estimate sequential time
-    seq_estimate = total_sims * (sim_steps * 0.002 / 10)  # rough: 10x realtime
-    print(f"\nEstimated sequential PyBullet time: ~{seq_estimate:.0f}s ({seq_estimate/60:.0f} min)")
-    print(f"MJX speedup: ~{seq_estimate/elapsed:.0f}x")
+    print("\nThis is measured evolution throughput, excluding initial compilation.")
+    print("A speedup claim requires a measured, matched CPU baseline; see docs/VALIDATION_PLAN.md.")
 
     return population, fitnesses
 

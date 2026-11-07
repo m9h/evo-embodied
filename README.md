@@ -8,6 +8,25 @@ A learning environment for **embodied intelligence** using **MuJoCo + MJX + JAX*
 
 **2. On-Ramp to the Virtual Rat** — every concept learned here (MuJoCo physics, MJX GPU parallelism, JAX `vmap`/`jit`/`grad`, neural controllers, MJCF morphologies) reappears in the virtualrat pipeline. Students who complete the 13 assignments have the foundation to work with STAC-MJX, track-mjx, and the full embodied intelligence stack.
 
+## Research validation
+
+The repository contains teaching examples and research prototypes. Its status as
+a competitive research platform still needs measured evidence. Start here:
+
+- [Research demonstrations and comparison projects](docs/RESEARCH_COMPARISONS.md):
+  Braitenberg development/learning/collectives, EvoGym, RoboMorph, and suitable
+  optimization, control and neural-simulation references.
+- [Validation plan](docs/VALIDATION_PLAN.md): experiment protocols, seed and compute
+  budgets, reference versions, acceptance criteria and implementation sequence.
+- [Observed validation status](docs/VALIDATION_STATUS.md): local CPU/MJX replay
+  results and current blockers, including the quadruped reset/contact discrepancy.
+
+The EvoGym extension is already part of the [course plan](COURSE_MAPPING.md):
+evolve voxel bodies, identify controlled dynamics, and evaluate feedback control.
+It requires an adapter and a separate Python environment; it is not implemented
+by the MuJoCo morphology example. Research comparisons must use the same task,
+evaluation budget and reference version before making performance claims.
+
 ## The Virtual Rat Pipeline
 
 The virtualrat project connects several components into a pipeline for biomechanically accurate rodent simulation and control:
@@ -93,14 +112,16 @@ The virtualrat project connects several components into a pipeline for biomechan
 
 | | PyBullet (current) | MuJoCo + MJX (this repo) |
 |---|---|---|
-| Maintainer | Unmaintained | Google DeepMind (active) |
 | Install | `pip install pybullet` | `pip install mujoco mujoco-mjx jax` |
 | API | C-style integer handles | Pythonic objects (`model.body`, `data.qpos`) |
-| Parallel sims | Sequential only | GPU-vectorized via JAX `vmap` (100-1000x speedup) |
-| Differentiable | No | Yes (MJX supports `jax.grad` through physics) |
+| Parallel sims | Requires an explicit parallel execution setup | JAX `vmap` batches independent simulations; performance must be measured |
+| Differentiable | Standard API does not expose JAX autodiff | MJX-JAX supports autodiff; validate gradients for the model/contact regime |
 | Visualization | Basic OpenGL | Built-in viewer + `mediapy` for notebooks |
 | Docs | Sparse | Excellent ([mujoco.readthedocs.io](https://mujoco.readthedocs.io)) |
-| Research adoption | Declining | Standard in robotics/RL research |
+
+No repository-wide speedup factor has been established. Compare identical
+rollouts, hardware resources, precision and compilation costs using the
+[benchmark protocol](docs/VALIDATION_PLAN.md#b1-locomotion-and-population-throughput).
 
 ## Quickstart
 
@@ -141,13 +162,15 @@ Assignments 1-8 use standard MuJoCo. Students learn physics simulation, robot de
 
 ### Phase 2: Evolutionary Search (MJX + JAX)
 
-Assignments 9-13 unlock MJX for **GPU-parallel evolution**. Students experience firsthand why vectorized computation matters — their own evolutionary algorithms run 100-1000x faster.
+Assignments 9-13 introduce **GPU-parallel evolution** with MJX. Students measure
+where batching helps and where compilation, contacts or small populations make
+native CPU simulation preferable.
 
 | # | Assignment | PyBullet (old) | MJX + JAX (new) | What Changes |
 |---|-----------|---------------|----------------|-------------|
 | 9 | **Random Search** | Sequential: loop over N random genomes | `jax.vmap`: evaluate N genomes in one GPU call | First taste of vectorization |
 | 10 | **Hill Climber** | Sequential: mutate, simulate, compare | Same logic, but `jax.jit`-compiled simulation | JIT compilation concept introduced |
-| 11 | **Parallel Hill Climber** | N sequential hill climbers (slow!) | `jax.vmap` over population — all run simultaneously | **The key upgrade** — orders of magnitude faster |
+| 11 | **Parallel Hill Climber** | N sequential hill climbers | `jax.vmap` over population | Measure throughput versus population size |
 | 12 | **Quadruped** | Design URDF by hand | Design MJCF by hand (same exercise) | MJCF is actually easier for articulated bodies |
 | 13 | **GA / Phototaxis** | Sequential fitness evaluation | Batched evaluation, `jax.random` for crossover | Full evolutionary algorithm at GPU speed |
 

@@ -1,5 +1,16 @@
 # Math Primitives Soft-Body Robotics Surfaces for jaxctrl
 
+## Validation scope
+
+This is an architectural proposal, not an ecosystem-wide novelty review or a
+record of implemented primitives. The availability assertions below are hypotheses
+to recheck against current source before making publication claims. The immediate
+evo-embodied priorities are reset/evaluator correctness and matched baselines in
+[VALIDATION_PLAN.md](VALIDATION_PLAN.md); these do not require every proposed
+primitive. [RESEARCH_COMPARISONS.md](RESEARCH_COMPARISONS.md) distinguishes
+EvoGym's simulation interface from differentiable engines and specifies DMDc for
+identifying controlled dynamics. Autonomous DMD does not provide an input matrix.
+
 A research note on which mathematical primitives a soft-body / voxel-evolution layer in `evo-embodied` would need, framed by the criterion that *new applications are valuable only when they surface math that benefits every other application of the library*.
 
 The target library is [`jaxctrl`](https://github.com/m9h/jaxctrl) — a JAX-native differentiable control-theory stack with roots in network control theory from neuroscience. The existing four layers (L0 system ID → L1 LTI control → L2 tensor control → L3 hypergraph control) are domain-agnostic by design. Adding soft-body-specific code paths is the wrong move; identifying primitives that soft-body, GRNs, neural networks, and active-inference generative models all need but the library doesn't yet have is the right one.
@@ -35,7 +46,7 @@ This is not a math gap — it's a *culture* gap. evo-embodied's task surface spa
 
 ### #1 — Saltation matrix as a JAX primitive (HIGHEST priority)
 
-The standard tool for linearizing through a hybrid jump (Kong, Payne, Zhu, Johnson, *T-RO* 2024 — [arXiv:2306.06862](https://arxiv.org/abs/2306.06862)). Every legged-robotics paper re-implements it. **No JAX-native implementation exists.**
+A standard tool for linearizing through a hybrid jump (Kong, Payne, Zhu, Johnson, *T-RO* 2024 — [arXiv:2306.06862](https://arxiv.org/abs/2306.06862)). No implementation has been selected and validated for this project; a fresh source review is required before claiming a missing ecosystem primitive.
 
 Signature: `saltation(f_pre, f_post, guard, x_event, t_event) -> S_matrix`. Must be `vmap`-able and differentiable.
 
@@ -53,7 +64,7 @@ Generality: same as saltation, *plus* all the smooth-limit-cycle cases (GRN repr
 
 ### #3 — Randomized / streaming DMD in JAX (MEDIUM priority, low risk)
 
-Math is settled (Erichson-Mathelin-Kutz 2017 for randomized; Hemati et al. for streaming). GPU CUDA implementations exist. The Python ecosystem has [PyDMD (1.2k★, last push Dec 2025)](https://github.com/PyDMD/PyDMD) and [PyKoopman (428★, last push Jan 2026)](https://github.com/dynamicslab/pykoopman), both healthy, both scipy-based. **Neither is JAX-native.** jaxctrl's `KoopmanEstimator` is exact DMD only — caps at a few hundred dimensions, breaks at voxel/neural-population scale.
+Relevant methods include Erichson-Mathelin-Kutz randomized DMD and Hemati et al.'s streaming DMD. [PyDMD](https://github.com/PyDMD/PyDMD) and [PyKoopman](https://github.com/dynamicslab/pykoopman) are candidate reference implementations. Profile dense exact DMD in `jaxctrl.KoopmanEstimator` at the intended state dimension before choosing an approximation; it has no demonstrated universal cutoff at a few hundred dimensions. Controlled identification additionally requires input histories (see B7).
 
 Generality: every domain in jaxctrl's README scales out — single-cell GRN data, neural population recordings, voxel sims, CFD. This is pure porting work, not new math, but it unblocks every high-dimensional use case the library already targets.
 
@@ -109,11 +120,11 @@ The original ranking was robotics-pulled. The `alf` cross-reference reweights:
 ## Recommendation
 
 **Tier 1 (build now):**
-- **#3 randomized/streaming DMD** — pure porting work of settled math (Erichson-Mathelin-Kutz 2017, Hemati streaming), no JAX-native version exists, unblocks every high-DOF use case across robotics, neural populations, single-cell trajectories, and coarse-graining for `alf`.
+- **#3 randomized/streaming DMD** — evaluate established methods against exact DMD on representative data; proceed with a JAX implementation if profiling and the reference comparison justify it.
 - **#6 time-varying Riccati propagator** — small in scope, large in dual-use density, builds on existing Diffrax integration in L1.
 
 **Tier 2 (build next):**
-- **#1 saltation matrix + #2 hybrid Floquet together** — inseparable mathematically, both universally missing, justify themselves on the hybrid-locomotion side alone and have clean future extensions to spiking neural nets and transcriptional bursting.
+- **#1 saltation matrix + #2 hybrid Floquet together** — evaluate as companion primitives for explicit hybrid models, with analytic event tests and an upstream implementation review before making novelty claims.
 
 **Hold:** #4 switched Koopman (too narrow), #5 global-Koopman-absorbing-contact (too speculative).
 

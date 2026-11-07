@@ -160,7 +160,8 @@ This is where evo-embodied diverges most from Josh's course. The concepts (rando
 
 **Script:** `examples/02_quadruped_random_search.py`
 
-**New concept:** Vectorization (`jax.vmap`). Students see 10-100x speedup on their first try.
+**New concept:** Vectorization (`jax.vmap`). Measure how population size and
+compilation affect throughput; a speedup is workload- and hardware-dependent.
 
 ---
 
@@ -182,7 +183,10 @@ This is where evo-embodied diverges most from Josh's course. The concepts (rando
 
 **Script:** `examples/03_mjx_parallel_evolution.py`
 
-**Benchmark:** 64 parallel hill climbers, 200 generations: RTX 2080 → 195 sims/sec. DGX Spark → ~27 sims/sec at pop 512.
+**Historical observations:** 64 parallel hill climbers, 200 generations:
+RTX 2080 → 195 sims/sec; DGX Spark → ~27 sims/sec at pop 512. These differently
+configured observations have no complete run manifests here and are not a
+controlled hardware comparison. Re-measure under B1 in the validation plan.
 
 ---
 
@@ -352,17 +356,24 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 
 **D. Cortical control** — Connect bl1 (spiking neural network with STDP) as the controller instead of a feedforward network. The "brain" learns via spike-timing-dependent plasticity rather than evolved weights.
 
-**E. Soft-body co-design with control analysis** — The three-way pairing: differentiable physics + evolutionary search + network control theory.
+**E. Soft-body co-design with control analysis** — A planned research extension,
+tracked as B5-B7 in [the validation plan](docs/VALIDATION_PLAN.md). The pairing is
+soft-body simulation, evolutionary search and control theory. The EvoGym adapter
+and controlled-system identification experiment are not yet implemented.
 
 The setup:
-1. **Differentiable soft-body sim** — Evolution Gym for hands-on work (voxel co-design benchmark, [EvolutionGym/evogym](https://github.com/EvolutionGym/evogym)), with SoftZoo as the physics oracle ([zswang666/softzoo](https://github.com/zswang666/softzoo) — differentiable MPM, the same culture the xenobot/RoboDiff lineage uses)
-2. **evosax** — evolutionary search over voxel morphologies (already in the project)
-3. **[jaxctrl](https://github.com/m9h/jaxctrl)** — network control theory, applied to evolved morphologies:
-   - `KoopmanEstimator` / DMD to fit a reduced-order linear surrogate of soft-body dynamics around a gait limit cycle
-   - `controllability_gramian` on the surrogate — is the evolved body actually steerable, or did evolution find a body that locomotes but is uncontrollable?
-   - `lqr` on the surrogate — closed-loop control fed back into the differentiable sim
 
-**Pitch:** *Evolution finds the body, control theory analyzes whether it's actually controllable, the gradient closes the loop.* The same primitives that jaxctrl provides for analyzing gene regulatory networks and brain dynamics apply here — jaxctrl originated in network control theory (the Liu-Slotine-Barabási / Chen-Surana line) and biology was just the first application domain. A soft-body voxel robot is another structured network whose controllability can be analyzed with the same mathematics.
+1. **Soft-body sim** — Evolution Gym for the voxel co-design benchmark ([EvolutionGym/evogym](https://github.com/EvolutionGym/evogym)). It does not provide JAX autodiff through its simulator. Use [SoftZoo](https://github.com/zswang666/softzoo) for a separate differentiable-physics study; different material models prevent treating it as an exact numerical oracle for EvoGym.
+2. **evosax** — an optional dependency already declared; a voxel morphology encoding and EvoGym search adapter still need implementation
+3. **[jaxctrl](https://github.com/m9h/jaxctrl)** — network control theory, applied to evolved morphologies:
+   - Fit a controlled surrogate from state/input trajectories using DMDc; autonomous `KoopmanEstimator`/exact DMD does not identify the actuator matrix B
+   - Analyze finite-horizon reachability with normalized state/input units and inspect conditioning
+   - Use discrete-time LQR for a discrete fitted model, with bounded corrections around a nominal trajectory and nonlinear evaluation in EvoGym
+
+**Research question:** Does controllability-informed body selection or feedback
+improve held-out disturbance recovery at the same training budget? Validate the
+identified model and the behavior separately; a well-conditioned Gramian alone
+does not establish a useful robot.
 
 **Reading:**
 - [`docs/RESEARCH_GAPS.md`](docs/RESEARCH_GAPS.md) — the math primitives this exercise stresses (saltation matrices, hybrid Floquet, randomized DMD) and which are still missing from the JAX ecosystem
@@ -372,12 +383,13 @@ The setup:
 - Bruder et al., "Modeling and control of soft robots using the Koopman operator," [*RSS* 2019](https://www.roboticsproceedings.org/rss15/p60.pdf)
 
 **Exercise:**
+
 1. Use Evolution Gym to evolve a voxel locomotion morphology on a flat-terrain task
 2. Roll out the evolved best-of-generation; collect state trajectories (voxel positions + velocities)
-3. Fit a reduced linear surrogate via `jaxctrl.KoopmanEstimator` (exact DMD) on the trajectories
-4. Compute `controllability_gramian(A_koop, B_koop)` — quantify how steerable the morphology is from its actuators
-5. Solve `lqr(A_koop, B_koop, Q, R)` on the surrogate; deploy the resulting feedback law in the original nonlinear Evolution Gym sim
-6. Compare three controllers on the same evolved body: (a) the evolved open-loop controller, (b) random control, (c) LQR-from-Koopman-surrogate. Which works best? Why?
+3. Collect excitation rollouts with recorded inputs, fit `(A, B)` using DMDc, and compare held-out prediction against persistence and [PyDMD](https://pydmd.github.io/PyDMD/dmdc.html)
+4. Check stabilizability and finite-horizon reachability after consistent state/input normalization
+5. Design bounded discrete-time feedback around a nominal trajectory, then evaluate in the original nonlinear Evolution Gym simulator
+6. Compare nominal control, zero correction, fitted feedback and wrong-model/null feedback on identical held-out perturbations. Charge identification rollouts to the training budget
 
 **What students learn:** Three orthogonal optimization layers — morphology, controller-via-evolution, and controller-via-control-theory — and how they compose. Also: that the network-control-theoretic primitives in jaxctrl are domain-general. The same `controllability_gramian` that answers "is this evolved voxel robot steerable" answers "is this gene regulatory network controllable by transcription factor perturbations" and "which brain regions must we stimulate to drive a target dynamics."
 
