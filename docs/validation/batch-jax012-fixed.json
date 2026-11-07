@@ -1,0 +1,411 @@
+{
+  "schema_version": 1,
+  "scope": "float32 evaluator agreement, not research validation",
+  "created_utc": "2026-11-07T07:12:42.232599+00:00",
+  "git_commit": "f8125e6ef8d138482772385c42db724ced54e312",
+  "git_status": "M experiments/validate_physics.py\n M experiments/validate_stack.py\n M models/bittle/bittle.xml\n M models/quadruped.xml\n M pyproject.toml\n M uv.lock\n?? docs/validation/batch-jax011-cpu-fixed.json\n?? docs/validation/physics-modern-fixed-128.json\n?? docs/validation/stack-modern-fixed.json\n?? experiments/mps_smoke.py\n?? experiments/validate_batch.py",
+  "runner_sha256": "f358ac539062a72429310a1e10007d4748c7243ed29d4378d9f3757d0086cdec",
+  "lock_sha256": "903e10fc628e634ea5c8ee5ee19a1612b5d1db8370770807ee4e7425c47b9ad2",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "python": "3.12.13",
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "versions": {
+    "jax": "0.12.0.1",
+    "jaxlib": "0.12.0.1",
+    "mujoco": "4.0.0",
+    "mujoco-mjx": "4.0.0",
+    "numpy": "2.5.4"
+  },
+  "model": "/Users/mhough/Workspace/evo-embodied/models/quadruped.xml",
+  "model_sha256": "cbf0a17bfa153a866c525dc81bf1fa84f8dbc01792016aab0396d22702540f7d",
+  "example_sha256": "8adae0c21718137218b21d4d2b3103d5e6bd85150d1d2f811163fd2c8b2aa09c",
+  "atol": 1e-06,
+  "rtol": 1e-05,
+  "dtype": "float32",
+  "reset_nonpenetrating": true,
+  "initial_min_contact_distance_m": null,
+  "cases": [
+    {
+      "steps": 16,
+      "seed": 0,
+      "population": 2,
+      "weights_sha256": "054bb2d0b41b27a93abd6860737d743ebbbd9f6a9ddd9163366574b5711094d8",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05
+      ],
+      "individual_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05
+      ],
+      "max_abs_error": 0.0,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 1,
+      "population": 2,
+      "weights_sha256": "4cd0b1e0e9a8cba794505435ef06d3ed7dda612b5722525fb0b4111bd47cb373",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        6.811912317061797e-05,
+        0.0010849327081814408
+      ],
+      "individual_fitness": [
+        6.81190867908299e-05,
+        0.0010849328245967627
+      ],
+      "max_abs_error": 1.1641532182693481e-10,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 42,
+      "population": 2,
+      "weights_sha256": "d7486332a42fa141d820b23ecb5c0c9c201ce473672889adc0aa6016ec42a866",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.001701702130958438,
+        3.2762964110588655e-05
+      ],
+      "individual_fitness": [
+        0.001701702130958438,
+        3.2762964110588655e-05
+      ],
+      "max_abs_error": 0.0,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 0,
+      "population": 4,
+      "weights_sha256": "08ca0434dfe4557978d9da5956594297b5826492a7e4e3ed1d587347c5ce68b1",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05,
+        0.0018982243491336703,
+        0.001021062838844955
+      ],
+      "individual_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05,
+        0.0018982241163030267,
+        0.001021062838844955
+      ],
+      "max_abs_error": 2.3283064365386963e-10,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 1,
+      "population": 4,
+      "weights_sha256": "fae77e2bf644c2c89d00f4bac80858d0f3e7e7cae8bb07eeea82debb4db3e224",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        6.811912317061797e-05,
+        0.0010849324753507972,
+        0.0027843958232551813,
+        0.001105337287299335
+      ],
+      "individual_fitness": [
+        6.81190867908299e-05,
+        0.0010849328245967627,
+        0.0027843958232551813,
+        0.0011053371708840132
+      ],
+      "max_abs_error": 3.4924596548080444e-10,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 42,
+      "population": 4,
+      "weights_sha256": "884ec33f4c28845a07916316f1bc7243200c1aafe65eb9b67ac06d96aa9c2223",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.001701702130958438,
+        3.2762927730800584e-05,
+        0.0003041956224478781,
+        0.0019281200366094708
+      ],
+      "individual_fitness": [
+        0.001701702130958438,
+        3.2762964110588655e-05,
+        0.0003041955642402172,
+        0.0019281201530247927
+      ],
+      "max_abs_error": 1.1641532182693481e-10,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 0,
+      "population": 2,
+      "weights_sha256": "054bb2d0b41b27a93abd6860737d743ebbbd9f6a9ddd9163366574b5711094d8",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.044293537735939026,
+        -0.01166128646582365
+      ],
+      "individual_fitness": [
+        0.04429355636239052,
+        -0.011661292053759098
+      ],
+      "max_abs_error": 1.862645149230957e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 1,
+      "population": 2,
+      "weights_sha256": "4cd0b1e0e9a8cba794505435ef06d3ed7dda612b5722525fb0b4111bd47cb373",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.05307639390230179,
+        -0.029978083446621895
+      ],
+      "individual_fitness": [
+        -0.053076379001140594,
+        -0.02997809462249279
+      ],
+      "max_abs_error": 1.4901161193847656e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 42,
+      "population": 2,
+      "weights_sha256": "d7486332a42fa141d820b23ecb5c0c9c201ce473672889adc0aa6016ec42a866",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.001842506229877472,
+        -0.0060046361759305
+      ],
+      "individual_fitness": [
+        0.001842487370595336,
+        -0.006004642695188522
+      ],
+      "max_abs_error": 1.885928213596344e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 0,
+      "population": 4,
+      "weights_sha256": "08ca0434dfe4557978d9da5956594297b5826492a7e4e3ed1d587347c5ce68b1",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.044293515384197235,
+        -0.011661290191113949,
+        -0.07413695007562637,
+        0.035193413496017456
+      ],
+      "individual_fitness": [
+        0.04429355636239052,
+        -0.011661292053759098,
+        -0.07413692027330399,
+        0.03519339859485626
+      ],
+      "max_abs_error": 4.0978193283081055e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 1,
+      "population": 4,
+      "weights_sha256": "fae77e2bf644c2c89d00f4bac80858d0f3e7e7cae8bb07eeea82debb4db3e224",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.05307639762759209,
+        -0.029978131875395775,
+        -0.0552731528878212,
+        -0.06051001697778702
+      ],
+      "individual_fitness": [
+        -0.053076379001140594,
+        -0.02997809462249279,
+        -0.05527317896485329,
+        -0.06051003560423851
+      ],
+      "max_abs_error": 3.725290298461914e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 42,
+      "population": 4,
+      "weights_sha256": "884ec33f4c28845a07916316f1bc7243200c1aafe65eb9b67ac06d96aa9c2223",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.0018425160087645054,
+        -0.006004640366882086,
+        -0.08960836380720139,
+        0.0075797890312969685
+      ],
+      "individual_fitness": [
+        0.001842487370595336,
+        -0.006004642695188522,
+        -0.0896083265542984,
+        0.007579789496958256
+      ],
+      "max_abs_error": 3.725290298461914e-08,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 0,
+      "population": 2,
+      "weights_sha256": "054bb2d0b41b27a93abd6860737d743ebbbd9f6a9ddd9163366574b5711094d8",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.17001347243785858,
+        -0.4450453221797943
+      ],
+      "individual_fitness": [
+        0.1700136363506317,
+        -0.4450450837612152
+      ],
+      "max_abs_error": 2.384185791015625e-07,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 1,
+      "population": 2,
+      "weights_sha256": "4cd0b1e0e9a8cba794505435ef06d3ed7dda612b5722525fb0b4111bd47cb373",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.2870212495326996,
+        -0.44842496514320374
+      ],
+      "individual_fitness": [
+        -0.28702232241630554,
+        -0.44842350482940674
+      ],
+      "max_abs_error": 1.4603137969970703e-06,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 42,
+      "population": 2,
+      "weights_sha256": "d7486332a42fa141d820b23ecb5c0c9c201ce473672889adc0aa6016ec42a866",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.14729918539524078,
+        -0.2500820755958557
+      ],
+      "individual_fitness": [
+        -0.1472991704940796,
+        -0.2500823140144348
+      ],
+      "max_abs_error": 2.384185791015625e-07,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 0,
+      "population": 4,
+      "weights_sha256": "08ca0434dfe4557978d9da5956594297b5826492a7e4e3ed1d587347c5ce68b1",
+      "finite": true,
+      "within_tolerance": false,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.170012965798378,
+        -0.44504523277282715,
+        -0.05620658025145531,
+        -0.16073162853717804
+      ],
+      "individual_fitness": [
+        0.1700136363506317,
+        -0.4450450837612152,
+        -0.0561942458152771,
+        -0.1607252061367035
+      ],
+      "max_abs_error": 1.2334436178207397e-05,
+      "passed": false
+    },
+    {
+      "steps": 500,
+      "seed": 1,
+      "population": 4,
+      "weights_sha256": "fae77e2bf644c2c89d00f4bac80858d0f3e7e7cae8bb07eeea82debb4db3e224",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.2870224714279175,
+        -0.448425829410553,
+        -0.39199599623680115,
+        -0.3643786609172821
+      ],
+      "individual_fitness": [
+        -0.28702232241630554,
+        -0.44842350482940674,
+        -0.39199650287628174,
+        -0.3643782436847687
+      ],
+      "max_abs_error": 2.3245811462402344e-06,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 42,
+      "population": 4,
+      "weights_sha256": "884ec33f4c28845a07916316f1bc7243200c1aafe65eb9b67ac06d96aa9c2223",
+      "finite": true,
+      "within_tolerance": false,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.14729908108711243,
+        -0.25008249282836914,
+        -0.042621780186891556,
+        -0.04889561980962753
+      ],
+      "individual_fitness": [
+        -0.1472991704940796,
+        -0.2500823140144348,
+        -0.042621783912181854,
+        -0.048898566514253616
+      ],
+      "max_abs_error": 2.946704626083374e-06,
+      "passed": false
+    }
+  ],
+  "passed": false
+}

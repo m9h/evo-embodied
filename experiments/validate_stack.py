@@ -59,23 +59,11 @@ CHECKS = {
         print('MJX-JAX float32: 2 Bittle rollouts x 16 steps, finite and repeatable')
     """,
     "example_batch": """
-        import hashlib
-        import importlib.util
-        import jax
-        import jax.numpy as jnp
-        import numpy as np
-        spec = importlib.util.spec_from_file_location('parallel_example',
-            'examples/03_mjx_parallel_evolution.py')
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        model, mm = module.load_model()
-        one, batch = module.make_evaluate_fn(mm, model.nsensordata, model.nu, 8, 16)
-        weights = jax.random.normal(jax.random.key(0),
-            (2, 8 * (model.nsensordata + model.nu))) * 0.1
-        print('weights_sha256', hashlib.sha256(np.asarray(weights).tobytes()).hexdigest(), flush=True)
-        np.testing.assert_allclose(batch(weights, mm),
-            jnp.stack([one(w, mm) for w in weights]), rtol=1e-5, atol=1e-6, equal_nan=False)
-        print('Example 03: batch and individual evaluation agree')
+        from pathlib import Path
+        import runpy
+        check = runpy.run_path('experiments/validate_batch.py')['check_batches']
+        assert check(Path('models/quadruped.xml'))['passed']
+        print('Example 03: 12 float32 cases agree through 128 steps')
     """,
     "notebooks_and_images": """
         import tempfile

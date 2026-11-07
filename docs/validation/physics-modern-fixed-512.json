@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "scope": "short open-loop replay; not paper reproduction or throughput evidence",
+  "created_utc": "2026-11-07T07:12:42.234596+00:00",
+  "git_commit": "f8125e6ef8d138482772385c42db724ced54e312",
+  "git_status": "M experiments/validate_physics.py\n M experiments/validate_stack.py\n M models/bittle/bittle.xml\n M models/quadruped.xml\n M pyproject.toml\n M uv.lock\n?? docs/validation/batch-jax011-cpu-fixed.json\n?? docs/validation/physics-modern-fixed-128.json\n?? docs/validation/stack-modern-fixed.json\n?? experiments/mps_smoke.py\n?? experiments/validate_batch.py",
+  "runner_sha256": "2967a3499ae8baf5ede7b3a214f327a88b2a0cb682f386df7e8b00ae06090432",
+  "lock_sha256": "903e10fc628e634ea5c8ee5ee19a1612b5d1db8370770807ee4e7425c47b9ad2",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "python": "3.12.13",
+  "versions": {
+    "jax": "0.12.0.1",
+    "jaxlib": "0.12.0.1",
+    "mujoco": "4.0.0",
+    "mujoco-mjx": "4.0.0",
+    "numpy": "2.5.4"
+  },
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "x64_enabled": true,
+  "atol": {
+    "qpos": 1e-06,
+    "qvel": 1e-05,
+    "sensordata": 0.0001
+  },
+  "rtol": 1e-05,
+  "models": [
+    {
+      "model": "models/quadruped.xml",
+      "model_sha256": "cbf0a17bfa153a866c525dc81bf1fa84f8dbc01792016aab0396d22702540f7d",
+      "steps": 512,
+      "timestep_s": 0.002,
+      "solver_tolerance": 1e-08,
+      "solver_tolerance_override": null,
+      "duration_s": 1.024,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": null,
+      "reset_nonpenetrating": true,
+      "compile_s": 1.6455232499865815,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "c35020473aed1b4642cd726cad727b63fff2824ad68cedd7ffb73c7cbd890479",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 4.363149143517947e-05,
+              "within_tolerance": false,
+              "repeat_exact": true,
+              "first_failing_step": 414
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 0.0008176224865361714,
+              "within_tolerance": false,
+              "repeat_exact": true,
+              "first_failing_step": 397
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 4.199624646210713e-05,
+              "within_tolerance": true,
+              "repeat_exact": true,
+              "first_failing_step": null
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 4,
+          "cpu_rollout_s": 0.0033461250131949782,
+          "mjx_warm_rollout_s": 0.031329666991950944,
+          "passed": false
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "ea5ff67486ee088ac0ff93c2710b038ec1b78de4e8a1acf01ce30a6e15ea20d8",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 0.517822313132756,
+              "within_tolerance": false,
+              "repeat_exact": true,
+              "first_failing_step": 45
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 18.284089463870696,
+              "within_tolerance": false,
+              "repeat_exact": true,
+              "first_failing_step": 45
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 0.517822313132756,
+              "within_tolerance": false,
+              "repeat_exact": true,
+              "first_failing_step": 52
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.012126707995776087,
+          "mjx_warm_rollout_s": 0.025679292011773214,
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "models/bittle/bittle.xml",
+      "model_sha256": "bb8e2dfff8dd81e2002b9b8382f76961fa7287a8ade0a82383e4fd757e2e65a0",
+      "steps": 512,
+      "timestep_s": 0.002,
+      "solver_tolerance": 1e-12,
+      "solver_tolerance_override": null,
+      "duration_s": 1.024,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": null,
+      "reset_nonpenetrating": true,
+      "compile_s": 2.1670033750124276,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "c35020473aed1b4642cd726cad727b63fff2824ad68cedd7ffb73c7cbd890479",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 3.508512097106212e-09,
+              "within_tolerance": true,
+              "repeat_exact": true,
+              "first_failing_step": null
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 6.141478136520358e-07,
+              "within_tolerance": true,
+              "repeat_exact": true,
+              "first_failing_step": null
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 2.707956030721707e-06,
+              "within_tolerance": true,
+              "repeat_exact": true,
+              "first_failing_step": null
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.003395250008907169,
+          "mjx_warm_rollout_s": 0.08812379199662246,
+          "passed": true
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "ea5ff67486ee088ac0ff93c2710b038ec1b78de4e8a1acf01ce30a6e15ea20d8",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 1.1102230246251565e-15,
+              "within_tolerance": true,
+              "repeat_exact": true,
+              "first_failing_step": null
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 1.3388812628023494e-14,
+              "within_tolerance": true,
+              "repeat_exact": true,
+              "first_failing_step": null
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 4.973799150320701e-13,
+              "within_tolerance": true,
+              "repeat_exact": true,
+              "first_failing_step": null
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.004169666994130239,
+          "mjx_warm_rollout_s": 0.07730666699353606,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": false
+}

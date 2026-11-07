@@ -1,7 +1,8 @@
 # Validation plan for a competitive research platform
 
-Status: proposed experiments, reviewed 2026-11-06. Only the small engine replay
-probe has been implemented and run; see [observed results](VALIDATION_STATUS.md).
+Status: proposed experiments, reviewed 2026-11-06. Small engine replay,
+dependency integration and float32 batching probes have been implemented and
+run; see [observed results](VALIDATION_STATUS.md) and [upgrade evidence](DEPENDENCIES.md).
 [RESEARCH_COMPARISONS.md](RESEARCH_COMPARISONS.md) identifies papers, code, and
 version boundaries. A demonstration video is not a validation result.
 
@@ -33,6 +34,19 @@ validity from a few successful agents.
 | Phase-shifted sine/cosine inputs at one frequency are linearly redundant | More clock channels do not demonstrate a richer periodic basis | Compare no clock, one sine/cosine pair, redundant phase channels, and genuinely different frequencies at matched controller capacity |
 | `models/single_link.xml` deliberately omits a touch-sensor site for a student exercise | Loading every XML is not a valid research readiness test | Mark it as an incomplete teaching fixture; use valid dedicated analytic fixtures in B0 |
 | No committed shared benchmark runner, CI suite, environment locks for references, or statistical report | Examples alone cannot support published comparisons | Deliver the run contract below before a full campaign |
+
+Follow-up: the quadruped root is now at 0.64 m (1 cm clearance), and the old
+penetrating model remains recoverable at revision `f8125e6`. This fixes the
+short batching regression but does not establish a settled reset protocol.
+Bittle's MuJoCo 4.0 convergence issue is resolved with solver tolerance 1e-12.
+The quadruped's first driven discrepancy involves differently oriented contact
+friction frames; an elliptic-cone diagnostic removes that discrepancy but later
+self-contact counts differ. Keep the full CPU/MJX gate open, and test matched
+contact generation before attributing policy differences to the optimizer.
+The expanded 512-step zero-input quadruped replay passes on the old stack but
+fails on the upgraded one. Add a stable-reset/perturbation-sensitivity fixture
+and localize its first acceleration difference; a tighter solver alone did not
+resolve it. This remains open even though the original upgrade blockers pass.
 
 Hardware deployment, paid LLM evolution, long GPU jobs, and reference-platform
 installation are outside this planning run. No experiment below has been silently

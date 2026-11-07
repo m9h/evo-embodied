@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "scope": "float32 evaluator agreement, not research validation",
+  "created_utc": "2026-11-07T07:12:42.365183+00:00",
+  "git_commit": "f8125e6ef8d138482772385c42db724ced54e312",
+  "git_status": "M experiments/validate_physics.py\n M experiments/validate_stack.py\n M models/bittle/bittle.xml\n M models/quadruped.xml\n M pyproject.toml\n M uv.lock\n?? docs/validation/batch-jax011-cpu-fixed.json\n?? docs/validation/physics-modern-fixed-128.json\n?? docs/validation/stack-modern-fixed.json\n?? experiments/mps_smoke.py\n?? experiments/validate_batch.py",
+  "runner_sha256": "f358ac539062a72429310a1e10007d4748c7243ed29d4378d9f3757d0086cdec",
+  "lock_sha256": "903e10fc628e634ea5c8ee5ee19a1612b5d1db8370770807ee4e7425c47b9ad2",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "python": "3.12.13",
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "versions": {
+    "jax": "0.10.2",
+    "jaxlib": "0.10.2",
+    "mujoco": "3.6.0",
+    "mujoco-mjx": "3.6.0",
+    "numpy": "2.5.4"
+  },
+  "model": "/Users/mhough/Workspace/evo-embodied/models/quadruped.xml",
+  "model_sha256": "cbf0a17bfa153a866c525dc81bf1fa84f8dbc01792016aab0396d22702540f7d",
+  "example_sha256": "8adae0c21718137218b21d4d2b3103d5e6bd85150d1d2f811163fd2c8b2aa09c",
+  "atol": 1e-06,
+  "rtol": 1e-05,
+  "dtype": "float32",
+  "reset_nonpenetrating": true,
+  "initial_min_contact_distance_m": null,
+  "cases": [
+    {
+      "steps": 500,
+      "seed": 0,
+      "population": 2,
+      "weights_sha256": "054bb2d0b41b27a93abd6860737d743ebbbd9f6a9ddd9163366574b5711094d8",
+      "finite": true,
+      "within_tolerance": false,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.17001335322856903,
+        -0.44504502415657043
+      ],
+      "individual_fitness": [
+        0.17005018889904022,
+        -0.4450451135635376
+      ],
+      "max_abs_error": 3.6835670471191406e-05,
+      "passed": false
+    },
+    {
+      "steps": 500,
+      "seed": 1,
+      "population": 2,
+      "weights_sha256": "4cd0b1e0e9a8cba794505435ef06d3ed7dda612b5722525fb0b4111bd47cb373",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.287021666765213,
+        -0.4484251141548157
+      ],
+      "individual_fitness": [
+        -0.2870224118232727,
+        -0.44842439889907837
+      ],
+      "max_abs_error": 7.450580596923828e-07,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 42,
+      "population": 2,
+      "weights_sha256": "d7486332a42fa141d820b23ecb5c0c9c201ce473672889adc0aa6016ec42a866",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.14729943871498108,
+        -0.2500820755958557
+      ],
+      "individual_fitness": [
+        -0.14729911088943481,
+        -0.2500813603401184
+      ],
+      "max_abs_error": 7.152557373046875e-07,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 0,
+      "population": 4,
+      "weights_sha256": "08ca0434dfe4557978d9da5956594297b5826492a7e4e3ed1d587347c5ce68b1",
+      "finite": true,
+      "within_tolerance": false,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.17001323401927948,
+        -0.4450450539588928,
+        -0.05620977282524109,
+        -0.1607220619916916
+      ],
+      "individual_fitness": [
+        0.17005018889904022,
+        -0.4450451135635376,
+        -0.056215886026620865,
+        -0.16073349118232727
+      ],
+      "max_abs_error": 3.695487976074219e-05,
+      "passed": false
+    },
+    {
+      "steps": 500,
+      "seed": 1,
+      "population": 4,
+      "weights_sha256": "fae77e2bf644c2c89d00f4bac80858d0f3e7e7cae8bb07eeea82debb4db3e224",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.28701990842819214,
+        -0.44842469692230225,
+        -0.39199575781822205,
+        -0.3643779456615448
+      ],
+      "individual_fitness": [
+        -0.2870224118232727,
+        -0.44842439889907837,
+        -0.3919968008995056,
+        -0.364378422498703
+      ],
+      "max_abs_error": 2.5033950805664062e-06,
+      "passed": true
+    },
+    {
+      "steps": 500,
+      "seed": 42,
+      "population": 4,
+      "weights_sha256": "884ec33f4c28845a07916316f1bc7243200c1aafe65eb9b67ac06d96aa9c2223",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.14729905128479004,
+        -0.2500825524330139,
+        -0.04262194409966469,
+        -0.04889454320073128
+      ],
+      "individual_fitness": [
+        -0.14729911088943481,
+        -0.2500813603401184,
+        -0.04262154549360275,
+        -0.04889436066150665
+      ],
+      "max_abs_error": 1.1920928955078125e-06,
+      "passed": true
+    }
+  ],
+  "passed": false
+}

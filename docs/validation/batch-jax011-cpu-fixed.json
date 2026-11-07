@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "scope": "float32 evaluator agreement, not research validation",
+  "created_utc": "2026-11-07T07:11:53.011601+00:00",
+  "git_commit": "f8125e6ef8d138482772385c42db724ced54e312",
+  "git_status": "M experiments/validate_physics.py\n M experiments/validate_stack.py\n M models/bittle/bittle.xml\n M models/quadruped.xml\n M pyproject.toml\n M uv.lock\n?? experiments/mps_smoke.py\n?? experiments/validate_batch.py",
+  "runner_sha256": "f358ac539062a72429310a1e10007d4748c7243ed29d4378d9f3757d0086cdec",
+  "lock_sha256": "903e10fc628e634ea5c8ee5ee19a1612b5d1db8370770807ee4e7425c47b9ad2",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "python": "3.12.13",
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "versions": {
+    "jax": "0.11.1",
+    "jaxlib": "0.11.1",
+    "mujoco": "3.6.0",
+    "mujoco-mjx": "3.6.0",
+    "numpy": "2.5.4"
+  },
+  "model": "/Users/mhough/Workspace/evo-embodied/models/quadruped.xml",
+  "model_sha256": "cbf0a17bfa153a866c525dc81bf1fa84f8dbc01792016aab0396d22702540f7d",
+  "example_sha256": "8adae0c21718137218b21d4d2b3103d5e6bd85150d1d2f811163fd2c8b2aa09c",
+  "atol": 1e-06,
+  "rtol": 1e-05,
+  "dtype": "float32",
+  "reset_nonpenetrating": true,
+  "initial_min_contact_distance_m": null,
+  "cases": [
+    {
+      "steps": 16,
+      "seed": 0,
+      "population": 2,
+      "weights_sha256": "054bb2d0b41b27a93abd6860737d743ebbbd9f6a9ddd9163366574b5711094d8",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05
+      ],
+      "individual_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05
+      ],
+      "max_abs_error": 0.0,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 1,
+      "population": 2,
+      "weights_sha256": "4cd0b1e0e9a8cba794505435ef06d3ed7dda612b5722525fb0b4111bd47cb373",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        6.811912317061797e-05,
+        0.0010849327081814408
+      ],
+      "individual_fitness": [
+        6.81190867908299e-05,
+        0.0010849328245967627
+      ],
+      "max_abs_error": 1.1641532182693481e-10,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 42,
+      "population": 2,
+      "weights_sha256": "d7486332a42fa141d820b23ecb5c0c9c201ce473672889adc0aa6016ec42a866",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.001701702130958438,
+        3.276295683463104e-05
+      ],
+      "individual_fitness": [
+        0.001701702130958438,
+        3.276295683463104e-05
+      ],
+      "max_abs_error": 0.0,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 0,
+      "population": 4,
+      "weights_sha256": "08ca0434dfe4557978d9da5956594297b5826492a7e4e3ed1d587347c5ce68b1",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05,
+        0.0018982243491336703,
+        0.001021062838844955
+      ],
+      "individual_fitness": [
+        0.002038435311987996,
+        7.284142338903621e-05,
+        0.0018982241163030267,
+        0.001021062838844955
+      ],
+      "max_abs_error": 2.3283064365386963e-10,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 1,
+      "population": 4,
+      "weights_sha256": "fae77e2bf644c2c89d00f4bac80858d0f3e7e7cae8bb07eeea82debb4db3e224",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        6.811912317061797e-05,
+        0.0010849324753507972,
+        0.0027843958232551813,
+        0.001105337287299335
+      ],
+      "individual_fitness": [
+        6.81190867908299e-05,
+        0.0010849328245967627,
+        0.0027843958232551813,
+        0.0011053371708840132
+      ],
+      "max_abs_error": 3.4924596548080444e-10,
+      "passed": true
+    },
+    {
+      "steps": 16,
+      "seed": 42,
+      "population": 4,
+      "weights_sha256": "884ec33f4c28845a07916316f1bc7243200c1aafe65eb9b67ac06d96aa9c2223",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.001701702130958438,
+        3.276292045484297e-05,
+        0.0003041956224478781,
+        0.0019281200366094708
+      ],
+      "individual_fitness": [
+        0.001701702130958438,
+        3.276295683463104e-05,
+        0.0003041955642402172,
+        0.0019281201530247927
+      ],
+      "max_abs_error": 1.1641532182693481e-10,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 0,
+      "population": 2,
+      "weights_sha256": "054bb2d0b41b27a93abd6860737d743ebbbd9f6a9ddd9163366574b5711094d8",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.04429355263710022,
+        -0.011661284603178501
+      ],
+      "individual_fitness": [
+        0.044293541461229324,
+        -0.011661287397146225
+      ],
+      "max_abs_error": 1.1175870895385742e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 1,
+      "population": 2,
+      "weights_sha256": "4cd0b1e0e9a8cba794505435ef06d3ed7dda612b5722525fb0b4111bd47cb373",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.05307639390230179,
+        -0.029978109523653984
+      ],
+      "individual_fitness": [
+        -0.05307638272643089,
+        -0.029978085309267044
+      ],
+      "max_abs_error": 2.421438694000244e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 42,
+      "population": 2,
+      "weights_sha256": "d7486332a42fa141d820b23ecb5c0c9c201ce473672889adc0aa6016ec42a866",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.0018425132147967815,
+        -0.006004640366882086
+      ],
+      "individual_fitness": [
+        0.0018424862064421177,
+        -0.006004634313285351
+      ],
+      "max_abs_error": 2.7008354663848877e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 0,
+      "population": 4,
+      "weights_sha256": "08ca0434dfe4557978d9da5956594297b5826492a7e4e3ed1d587347c5ce68b1",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.04429353401064873,
+        -0.01166128646582365,
+        -0.07413697242736816,
+        0.03519342094659805
+      ],
+      "individual_fitness": [
+        0.044293541461229324,
+        -0.011661287397146225,
+        -0.07413694262504578,
+        0.035193417221307755
+      ],
+      "max_abs_error": 2.9802322387695312e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 1,
+      "population": 4,
+      "weights_sha256": "fae77e2bf644c2c89d00f4bac80858d0f3e7e7cae8bb07eeea82debb4db3e224",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        -0.0530763640999794,
+        -0.029978111386299133,
+        -0.05527316406369209,
+        -0.06051002815365791
+      ],
+      "individual_fitness": [
+        -0.05307638272643089,
+        -0.029978085309267044,
+        -0.0552731528878212,
+        -0.060510046780109406
+      ],
+      "max_abs_error": 2.60770320892334e-08,
+      "passed": true
+    },
+    {
+      "steps": 128,
+      "seed": 42,
+      "population": 4,
+      "weights_sha256": "884ec33f4c28845a07916316f1bc7243200c1aafe65eb9b67ac06d96aa9c2223",
+      "finite": true,
+      "within_tolerance": true,
+      "repeat_exact": true,
+      "batch_fitness": [
+        0.001842512167058885,
+        -0.006004635710269213,
+        -0.08960842341184616,
+        0.0075797876343131065
+      ],
+      "individual_fitness": [
+        0.0018424862064421177,
+        -0.006004634313285351,
+        -0.08960837125778198,
+        0.007579773664474487
+      ],
+      "max_abs_error": 5.21540641784668e-08,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

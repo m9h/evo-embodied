@@ -128,7 +128,8 @@ rollouts, hardware resources, precision and compilation costs using the
 The checked-in `.python-version` selects Python 3.12, including a prebuilt
 `labmaze` dependency for the RL extra. Exact versions are in `uv.lock`.
 See [dependency compatibility and upgrade evidence](docs/DEPENDENCIES.md) for
-the physics/JAX version holds and the separate experimental Apple GPU environment.
+the MuJoCo 4.0/JAX 0.12 fixes, remaining validation gaps, and the separate
+experimental Apple GPU environment.
 
 ```bash
 # Fedora
@@ -218,9 +219,9 @@ After the 13 assignments, students have the foundation for the full stack:
 
 | Package | Why |
 |---------|-----|
-| `mujoco==3.6.0` | Physics engine; 4.0 is held pending replay validation |
-| `mujoco-mjx==3.6.0` | JAX physics implementation matched to MuJoCo |
-| `jax>=0.10.2,<0.11` | Numerical computing; newer versions fail a float32 batching check |
+| `mujoco==4.0.0` | Physics engine; Bittle solver convergence validated through 512 steps |
+| `mujoco-mjx==4.0.0` | JAX physics implementation matched to MuJoCo |
+| `jax>=0.12.0.1,<0.13` | Numerical computing; corrected reset passes float32 batching through 128 steps |
 | `numpy>=2.5.4,<3` | Array operations, neural network weight matrices |
 | `matplotlib>=3.11.2,<4` | Fitness curves, population statistics, sensor visualization |
 | `mediapy>=1.2.7,<2` | Render MuJoCo frames to video in Jupyter notebooks |

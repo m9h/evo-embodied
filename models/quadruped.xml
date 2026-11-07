@@ -9,7 +9,9 @@
     <light pos="0 0 3" dir="0 0 -1"/>
     <geom type="plane" size="10 10 0.1" rgba="0.9 0.9 0.9 1"/>
 
-    <body name="torso" pos="0 0 0.5">
+    <!-- Legs extend 0.63 m below the root: start with 1 cm ground clearance.
+         The former 0.5 m reset penetrated the floor by 13 cm. -->
+    <body name="torso" pos="0 0 0.64">
       <freejoint name="root"/>
       <geom type="box" size="0.4 0.2 0.1" mass="5" rgba="0.3 0.3 0.8 1"/>
 

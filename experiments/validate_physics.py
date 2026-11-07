@@ -41,10 +41,12 @@ def git_value(*args):
     ).strip()
 
 
-def check_model(path, steps):
+def check_model(path, steps, solver_tolerance=None):
     model = mujoco.MjModel.from_xml_path(str(path))
-    mjx_model = mjx.put_model(model)
-    initial = mjx.make_data(mjx_model)
+    if solver_tolerance is not None:
+        model.opt.tolerance = solver_tolerance
+    mjx_model = mjx.put_model(model, impl="jax")
+    initial = mjx.make_data(mjx_model, impl="jax")
 
     @jax.jit
     def rollout(actions):
@@ -57,6 +59,7 @@ def check_model(path, steps):
     inspection = mujoco.MjData(model)
     mujoco.mj_forward(model, inspection)
     initial_distances = [float(c.dist) for c in inspection.contact]
+    reset_valid = all(distance >= -1e-8 for distance in initial_distances)
     t = np.arange(steps)[:, None] * model.opt.timestep
     phase = np.arange(model.nu)[None, :] * np.pi / 4
     inputs = {
@@ -99,6 +102,9 @@ def check_model(path, steps):
             ref = np.asarray(reference[field])
             actual, repeat = np.asarray(actual), np.asarray(repeat)
             finite = bool(np.isfinite(ref).all() and np.isfinite(actual).all())
+            bad_steps = np.flatnonzero(~np.all(np.isclose(
+                actual, ref, atol=ABS_TOL[field], rtol=REL_TOL
+            ), axis=1))
             checks[field] = {
                 "finite": finite,
                 "max_abs_error": float(np.max(np.abs(actual - ref), initial=0))
@@ -107,6 +113,7 @@ def check_model(path, steps):
                     actual, ref, atol=ABS_TOL[field], rtol=REL_TOL
                 )),
                 "repeat_exact": bool(np.array_equal(actual, repeat)),
+                "first_failing_step": int(bad_steps[0]) + 1 if bad_steps.size else None,
             }
         warning_counts = [int(w.number) for w in data.warning]
         passed = not any(warning_counts) and all(
@@ -127,12 +134,15 @@ def check_model(path, steps):
         "model_sha256": sha256(path),
         "steps": steps,
         "timestep_s": float(model.opt.timestep),
+        "solver_tolerance": float(model.opt.tolerance),
+        "solver_tolerance_override": solver_tolerance,
         "duration_s": steps * float(model.opt.timestep),
         "nq": model.nq, "nv": model.nv, "nu": model.nu,
         "initial_min_contact_distance_m": min(initial_distances, default=None),
+        "reset_nonpenetrating": reset_valid,
         "compile_s": compile_s,
         "cases": cases,
-        "passed": all(case["passed"] for case in cases),
+        "passed": reset_valid and all(case["passed"] for case in cases),
     }
 
 
@@ -141,10 +151,16 @@ def main():
     parser.add_argument("--model", action="append", type=Path,
                         help="Repeat for several XMLs; default: models/quadruped.xml")
     parser.add_argument("--steps", type=int, default=32)
+    parser.add_argument("--solver-tolerance", type=float,
+                        help="Diagnostic convergence override; does not change comparison tolerances")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.steps < 1:
         parser.error("--steps must be positive")
+    if args.solver_tolerance is not None and (
+        not np.isfinite(args.solver_tolerance) or args.solver_tolerance < 0
+    ):
+        parser.error("--solver-tolerance must be finite and nonnegative")
     if args.output.exists():
         parser.error("--output already exists; choose a new result path")
     # Reference precision. Float32/GPU validation is a separate benchmark gate.
@@ -174,7 +190,7 @@ def main():
         path = path.resolve()
         print(f"Checking {path.name} ({args.steps} steps)...", flush=True)
         try:
-            result = check_model(path, args.steps)
+            result = check_model(path, args.steps, args.solver_tolerance)
         except Exception as exc:
             result = {"model": str(path), "passed": False,
                       "error": f"{type(exc).__name__}: {exc}"}

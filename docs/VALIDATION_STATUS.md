@@ -4,15 +4,22 @@ Review date: 2026-11-06. Base revision:
 `fde9fc82d41b4aff541df86d023a80d1e43805e7`.
 
 Dependency follow-up: [the upgrade report](DEPENDENCIES.md) records the adopted
-JAX 0.10.2 stack, isolated MPS checks, and held MuJoCo 4.0/JAX 0.11–0.12 candidates.
-The final 32/128-step runs retain the physics outcomes below. This document's
-original versions and raw reports remain historical evidence.
+MuJoCo/MJX 4.0 and JAX 0.12 stack. Correcting the quadruped's penetrating reset
+resolves the short float32 batching regression, including JAX 0.11 CPU checks.
+Tightening Bittle's solver tolerance resolves its 4.0 replay regression through
+512 steps. The older driven-quadruped native/MJX mismatch remains, as does strict
+500-step float32 batch agreement on both old and new stacks. The expanded
+512-step zero-input quadruped check also exposes a new-stack regression that
+solver tolerance alone does not fix; see the upgrade report's remaining gates.
+The original versions, model settings and raw reports below remain historical evidence.
 
 **Current conclusion:** the project is a promising experiment substrate with
 simulation and training examples. Competitive research performance and paper reproduction have
 not been established. The newly added physics probe produces an actionable
-failure on the quadruped and passes the tested Bittle cases. It is the first part
-of B0, not a completed platform validation.
+failure on the quadruped and passes the tested Bittle cases. The current
+quadruped reset has 1 cm ground clearance; settling and the remaining evaluator
+issues still need work. These checks are part of B0, not completed platform
+validation. Old/new model scores must be reevaluated under the same reset.
 
 ## What ran
 
