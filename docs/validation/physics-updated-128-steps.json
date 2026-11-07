@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "scope": "short open-loop replay; not paper reproduction or throughput evidence",
+  "created_utc": "2026-11-07T06:54:31.091145+00:00",
+  "git_commit": "9a278b2e19ade6eb6cfe585a2e2f7804a661ecf7",
+  "git_status": "M .gitignore\n M README.md\n M examples/00_reference_demos.py\n M pyproject.toml\n M uv.lock\n?? .python-version\n?? docs/validation/physics-jax012-mj36-128-steps.json\n?? docs/validation/physics-jax012-mj36-32-steps.json\n?? docs/validation/stack-jax012-candidate.json\n?? docs/validation/stack-mps.json\n?? docs/validation/stack-updated.json\n?? environments/\n?? experiments/mps_smoke.py\n?? experiments/validate_stack.py",
+  "runner_sha256": "f48cfba2e333a144655baa185138fdc90b3fdcf17970fa77821a07c2db85a4b3",
+  "lock_sha256": "515cda309bedfba931425f8beef05227ae79b61c6e0b09345ecbd6c826597186",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "python": "3.12.13",
+  "versions": {
+    "jax": "0.10.2",
+    "jaxlib": "0.10.2",
+    "mujoco": "3.6.0",
+    "mujoco-mjx": "3.6.0",
+    "numpy": "2.5.4"
+  },
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "x64_enabled": true,
+  "atol": {
+    "qpos": 1e-06,
+    "qvel": 1e-05,
+    "sensordata": 0.0001
+  },
+  "rtol": 1e-05,
+  "models": [
+    {
+      "model": "models/quadruped.xml",
+      "model_sha256": "3587bfedb049ea8d406ed8e88d9c5fd3e266449b2591ca4d9bd70f5fbdf83037",
+      "steps": 128,
+      "timestep_s": 0.002,
+      "duration_s": 0.256,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": -0.12999999999999998,
+      "compile_s": 1.6460455000051297,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 4.566693434356017e-09,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 4.0550856022992614e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 4.5300260712401534e-09,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 4,
+          "cpu_rollout_s": 0.0007852920098230243,
+          "mjx_warm_rollout_s": 0.005701374990167096,
+          "passed": true
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "316056ba2b0153a0dd9e590046ee83e08ca5ae4b25d0f2f61f6831653dd87166",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 0.003284666500070532,
+              "within_tolerance": false,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 0.060517584998908136,
+              "within_tolerance": false,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 0.003284666500070532,
+              "within_tolerance": false,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 4,
+          "cpu_rollout_s": 0.0010715420066844672,
+          "mjx_warm_rollout_s": 0.008476749993860722,
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "models/bittle/bittle.xml",
+      "model_sha256": "ab637285c9f2caa9fa7714dc7a47c0d079c8d45395eeb28f8d290ade15ec4340",
+      "steps": 128,
+      "timestep_s": 0.002,
+      "duration_s": 0.256,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": null,
+      "compile_s": 1.8301543749985285,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 8.194166139742981e-11,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 2.847058152758014e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 4.1807398654114536e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.0009327080042567104,
+          "mjx_warm_rollout_s": 0.013000125007238239,
+          "passed": true
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "316056ba2b0153a0dd9e590046ee83e08ca5ae4b25d0f2f61f6831653dd87166",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 6.661338147750939e-16,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 1.1188966420050406e-14,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 5.826450433232822e-13,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.0009546249930281192,
+          "mjx_warm_rollout_s": 0.013508375006495044,
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": false
+}

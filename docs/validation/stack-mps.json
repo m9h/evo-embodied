@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "scope": "dependency smoke checks, not physics parity or research validation",
+  "created_utc": "2026-11-07T06:54:07.486219+00:00",
+  "python": "3.12.13",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "backend": "mps",
+  "git_commit": "9a278b2e19ade6eb6cfe585a2e2f7804a661ecf7",
+  "git_status": "M .gitignore\n M README.md\n M examples/00_reference_demos.py\n M pyproject.toml\n M uv.lock\n?? .python-version\n?? docs/validation/physics-jax012-mj36-128-steps.json\n?? docs/validation/physics-jax012-mj36-32-steps.json\n?? docs/validation/stack-jax012-candidate.json\n?? docs/validation/stack-updated.json\n?? environments/\n?? experiments/mps_smoke.py\n?? experiments/validate_stack.py",
+  "runner_sha256": "2083cf53d2415b513fc3bfca99d88958010f2def178790761bc30ffccd7414a1",
+  "lock_sha256": "85dee9884b465905e01d8b1788d993efd1d77d0d0d51bbde7e50d117d09402fa",
+  "versions": {
+    "PyOpenGL": "3.1.10",
+    "absl-py": "2.5.1",
+    "etils": "1.15.0",
+    "fsspec": "2026.9.0",
+    "glfw": "2.11.0",
+    "jax": "0.11.1",
+    "jax-mps": "0.11.1",
+    "jaxlib": "0.11.1",
+    "ml_dtypes": "0.6.0",
+    "mujoco": "3.6.0",
+    "mujoco-mjx": "3.6.0",
+    "numpy": "2.5.4",
+    "opt_einsum": "3.4.0",
+    "scipy": "1.18.1",
+    "trimesh": "5.2.0",
+    "typing_extensions": "4.16.0",
+    "zipp": "4.1.2"
+  },
+  "checks": {
+    "jax": {
+      "passed": true,
+      "returncode": 0,
+      "stdout": "0.11.1 [MpsDevice(id=0)]\n",
+      "stderr": "Platform 'mps' is experimental and not all JAX functionality may be correctly supported!\n[jax-mps] Tip: set JAX_MPS_ASYNC_DISPATCH=1 to opt into async dispatch (experimental; can be much faster for dispatch-bound workloads).\n",
+      "elapsed_s": 0.5312863749859389
+    },
+    "mjx": {
+      "passed": true,
+      "returncode": 0,
+      "stdout": "Failed to import warp: No module named 'warp'\nFailed to import mujoco_warp: No module named 'warp'\nMJX-JAX float32: 2 Bittle rollouts x 16 steps, finite and repeatable\n",
+      "stderr": "Platform 'mps' is experimental and not all JAX functionality may be correctly supported!\n[jax-mps] Tip: set JAX_MPS_ASYNC_DISPATCH=1 to opt into async dispatch (experimental; can be much faster for dispatch-bound workloads).\n",
+      "elapsed_s": 2.967630042025121
+    }
+  },
+  "passed": true
+}

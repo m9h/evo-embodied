@@ -3,6 +3,11 @@
 Review date: 2026-11-06. Base revision:
 `fde9fc82d41b4aff541df86d023a80d1e43805e7`.
 
+Dependency follow-up: [the upgrade report](DEPENDENCIES.md) records the adopted
+JAX 0.10.2 stack, isolated MPS checks, and held MuJoCo 4.0/JAX 0.11–0.12 candidates.
+The final 32/128-step runs retain the physics outcomes below. This document's
+original versions and raw reports remain historical evidence.
+
 **Current conclusion:** the project is a promising experiment substrate with
 simulation and training examples. Competitive research performance and paper reproduction have
 not been established. The newly added physics probe produces an actionable

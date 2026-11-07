@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "scope": "short open-loop replay; not paper reproduction or throughput evidence",
+  "created_utc": "2026-11-07T06:28:04.056414+00:00",
+  "git_commit": "9a278b2e19ade6eb6cfe585a2e2f7804a661ecf7",
+  "git_status": "?? experiments/mps_smoke.py",
+  "runner_sha256": "f48cfba2e333a144655baa185138fdc90b3fdcf17970fa77821a07c2db85a4b3",
+  "lock_sha256": "bed59635ce1659617ea41ba9166059e9068d705765a3376858eca776a92dd828",
+  "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+  "python": "3.13.13",
+  "versions": {
+    "jax": "0.12.0.1",
+    "jaxlib": "0.12.0.1",
+    "mujoco": "4.0.0",
+    "mujoco-mjx": "4.0.0",
+    "numpy": "2.5.4"
+  },
+  "backend": "cpu",
+  "devices": [
+    "cpu:0"
+  ],
+  "x64_enabled": true,
+  "atol": {
+    "qpos": 1e-06,
+    "qvel": 1e-05,
+    "sensordata": 0.0001
+  },
+  "rtol": 1e-05,
+  "models": [
+    {
+      "model": "models/quadruped.xml",
+      "model_sha256": "3587bfedb049ea8d406ed8e88d9c5fd3e266449b2591ca4d9bd70f5fbdf83037",
+      "steps": 128,
+      "timestep_s": 0.002,
+      "duration_s": 0.256,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": -0.12999999999999998,
+      "compile_s": 1.4408416250080336,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 4.654710602143351e-09,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 4.1332497796314387e-08,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 4.6173365264964825e-09,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 4,
+          "cpu_rollout_s": 0.0005281670019030571,
+          "mjx_warm_rollout_s": 0.003276916017057374,
+          "passed": true
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "316056ba2b0153a0dd9e590046ee83e08ca5ae4b25d0f2f61f6831653dd87166",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 0.0032846665000713093,
+              "within_tolerance": false,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 0.06051758499889748,
+              "within_tolerance": false,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 0.0032846665000713093,
+              "within_tolerance": false,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 4,
+          "cpu_rollout_s": 0.0007879159820731729,
+          "mjx_warm_rollout_s": 0.004815666005015373,
+          "passed": false
+        }
+      ],
+      "passed": false
+    },
+    {
+      "model": "models/bittle/bittle.xml",
+      "model_sha256": "ab637285c9f2caa9fa7714dc7a47c0d079c8d45395eeb28f8d290ade15ec4340",
+      "steps": 128,
+      "timestep_s": 0.002,
+      "duration_s": 0.256,
+      "nq": 15,
+      "nv": 14,
+      "nu": 8,
+      "initial_min_contact_distance_m": null,
+      "compile_s": 1.506627208989812,
+      "cases": [
+        {
+          "input": "zero",
+          "actions_sha256": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 4.1805679705609677e-07,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 6.57680681560156e-05,
+              "within_tolerance": false,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 0.00012286991243493084,
+              "within_tolerance": false,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.000880667008459568,
+          "mjx_warm_rollout_s": 0.009592791000613943,
+          "passed": false
+        },
+        {
+          "input": "sine",
+          "actions_sha256": "316056ba2b0153a0dd9e590046ee83e08ca5ae4b25d0f2f61f6831653dd87166",
+          "checks": {
+            "qpos": {
+              "finite": true,
+              "max_abs_error": 6.661338147750939e-16,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "qvel": {
+              "finite": true,
+              "max_abs_error": 1.3388812628023494e-14,
+              "within_tolerance": true,
+              "repeat_exact": true
+            },
+            "sensordata": {
+              "finite": true,
+              "max_abs_error": 4.973799150320701e-13,
+              "within_tolerance": true,
+              "repeat_exact": true
+            }
+          },
+          "cpu_warning_counts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "cpu_max_contacts": 8,
+          "cpu_rollout_s": 0.0008272910199593753,
+          "mjx_warm_rollout_s": 0.010380833002272993,
+          "passed": true
+        }
+      ],
+      "passed": false
+    }
+  ],
+  "passed": false
+}

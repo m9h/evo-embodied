@@ -4,22 +4,26 @@ version = "0.1.0"
 description = "Modern evolutionary robotics environment: MuJoCo + MJX + JAX replacing pyrosim/pybullet"
 requires-python = ">=3.12"
 dependencies = [
-    "mujoco>=3.2",
-    "mujoco-mjx>=3.2",
-    "jax>=0.4.35",
-    "jaxlib>=0.4.35",
-    "numpy>=1.26",
-    "matplotlib>=3.8",
-    "mediapy>=1.2",
-    "jupyterlab>=4.0",
-    "ipywidgets>=8.0",
-    "ipykernel>=6.0",
+    # MuJoCo 4.0 adds a Bittle CPU/MJX replay failure; see docs/DEPENDENCIES.md.
+    "mujoco==3.6.0",
+    "mujoco-mjx==3.6.0",
+    # 0.11/0.12 fail the float32 batch-equivalence check in validate_stack.py.
+    "jax>=0.10.2,<0.11",
+    "jaxlib>=0.10.2,<0.11",
+    "numpy>=2.5.4,<3",
+    "matplotlib>=3.11.2,<4",
+    "mediapy>=1.2.7,<2",
+    "jupyterlab>=4.6.6,<5",
+    "ipywidgets>=8.1.9,<9",
+    "ipykernel>=7.4.0,<8",
 ]
 
 [project.optional-dependencies]
-gpu = ["jax[cuda13]>=0.8.0"]
-strategies = ["evosax>=0.1"]
-rl = ["brax>=0.12", "dm_control>=1.0"]
-demos = ["playground>=0.1", "onnxruntime>=1.17"]
-llm = ["openai>=1.0"]
+gpu = ["jax[cuda13]>=0.10.2,<0.11; sys_platform == 'linux'"]
+strategies = ["evosax>=0.3.2,<0.4"]
+# Keep the MuJoCo 3.6-compatible reference stack until the 4.0 gate passes.
+rl = ["brax==0.14.2", "dm_control==1.0.38"]
+# Playground 1.0 moves to PyTorch/Warp; preserve the JAX/MJX baseline.
+demos = ["playground==0.2.0", "onnxruntime>=1.31.1,<2"]
+llm = ["openai>=3.46.0,<4"]
 full = ["evo-embodied[gpu,strategies,rl,demos,llm]"]

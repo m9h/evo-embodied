@@ -125,6 +125,11 @@ rollouts, hardware resources, precision and compilation costs using the
 
 ## Quickstart
 
+The checked-in `.python-version` selects Python 3.12, including a prebuilt
+`labmaze` dependency for the RL extra. Exact versions are in `uv.lock`.
+See [dependency compatibility and upgrade evidence](docs/DEPENDENCIES.md) for
+the physics/JAX version holds and the separate experimental Apple GPU environment.
+
 ```bash
 # Fedora
 bash setup.sh
@@ -194,7 +199,7 @@ After the 13 assignments, students have the foundation for the full stack:
 | `strategies` | `uv sync --extra strategies` | `evosax` — GPU-accelerated CMA-ES, OpenES, PGPE |
 | `rl` | `uv sync --extra rl` | `brax` + `dm_control` — compare evolution vs. RL |
 | `gpu` | `uv sync --extra gpu` | JAX CUDA backend for MJX |
-| `full` | `uv sync --extra full` | Everything above |
+| `full` | `uv sync --extra full` | All research extras; CUDA is installed only on Linux |
 
 ## Key Concepts Introduced
 
@@ -213,13 +218,13 @@ After the 13 assignments, students have the foundation for the full stack:
 
 | Package | Why |
 |---------|-----|
-| `mujoco>=3.2` | Physics engine — rigid bodies, joints, motors, sensors, contact |
-| `mujoco-mjx>=3.2` | JAX-accelerated MuJoCo for GPU-parallel simulation |
-| `jax>=0.4.35` | Numerical computing framework — `vmap`, `jit`, `grad` |
-| `numpy>=1.26` | Array operations, neural network weight matrices |
-| `matplotlib>=3.8` | Fitness curves, population statistics, sensor visualization |
-| `mediapy>=1.2` | Render MuJoCo frames to video in Jupyter notebooks |
-| `jupyterlab>=4.0` | Notebook environment |
+| `mujoco==3.6.0` | Physics engine; 4.0 is held pending replay validation |
+| `mujoco-mjx==3.6.0` | JAX physics implementation matched to MuJoCo |
+| `jax>=0.10.2,<0.11` | Numerical computing; newer versions fail a float32 batching check |
+| `numpy>=2.5.4,<3` | Array operations, neural network weight matrices |
+| `matplotlib>=3.11.2,<4` | Fitness curves, population statistics, sensor visualization |
+| `mediapy>=1.2.7,<2` | Render MuJoCo frames to video in Jupyter notebooks |
+| `jupyterlab>=4.6.6,<5` | Notebook environment |
 
 ### Not included (by design)
 

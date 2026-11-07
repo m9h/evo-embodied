@@ -1,10 +1,9 @@
 """Reference demonstrations: see what good locomotion looks like.
 
 Before evolving your own controllers, watch trained agents walk.
-This script provides three levels of pre-trained locomotion demos,
-from easiest to most advanced.
+This script trains Brax policies or inspects MuJoCo Playground environments.
 
-## Quick start (no extra deps):
+## Brax training (requires the rl extra):
     uv run python examples/00_reference_demos.py --brax-ant
 
 ## With demo extras:
@@ -15,8 +14,8 @@ from easiest to most advanced.
 
   --brax-ant         Train a walking ant in ~3 min with PPO (brax, in rl extra)
   --brax-humanoid    Train a walking humanoid with PPO (brax, in rl extra)
-  --playground-go1   Run pre-trained Unitree Go1 quadruped (playground, in demos extra)
-  --playground-g1    Run pre-trained Unitree G1 humanoid (playground, in demos extra)
+  --playground-go1   Inspect Unitree Go1 environment (playground, in demos extra)
+  --playground-g1    List Unitree G1 environments (playground, in demos extra)
   --list             List all available demos
 """
 import argparse
@@ -189,11 +188,7 @@ def _render_brax(env, make_inference_fn, params, filename):
 
 
 def demo_playground_go1():
-    """Run the pre-trained Unitree Go1 quadruped from MuJoCo Playground.
-
-    This is a real quadruped robot walking with a trained neural controller.
-    No training required — the ONNX policy is pre-packaged.
-    """
+    """Inspect a Go1 environment from the pinned JAX/MJX Playground release."""
     try:
         from mujoco_playground import registry
     except ImportError:
@@ -201,15 +196,15 @@ def demo_playground_go1():
         return
 
     print("\n=== MuJoCo Playground: Unitree Go1 Locomotion ===")
-    print("Pre-trained policy — no training needed.\n")
+    print("Inspecting the environment; this demo does not load a trained policy.\n")
 
     # List available environments
-    go1_envs = [e for e in registry.list_environments() if "go1" in e.lower()]
+    go1_envs = [e for e in registry.ALL_ENVS if "go1" in e.lower()]
     print(f"Go1 environments: {go1_envs}")
 
     # Create environment
     env_name = "Go1JoystickFlatTerrain"
-    if env_name not in registry.list_environments():
+    if env_name not in registry.ALL_ENVS:
         # Try alternative names
         for name in go1_envs:
             if "flat" in name.lower() or "joystick" in name.lower():
@@ -217,15 +212,14 @@ def demo_playground_go1():
                 break
 
     print(f"Loading {env_name}...")
-    env = registry.load(env_name)
+    env = registry.load(env_name, config_overrides={"impl": "jax"})
     print(f"Observation: {env.observation_size}, Action: {env.action_size}")
-    print("\nTo run interactively with a viewer:")
-    print(f"  python -m mujoco_playground.play --env {env_name}")
-    print("\nSee: https://playground.mujoco.org/")
+    print("\nTraining and policy playback require the upstream JAX workflow:")
+    print("https://github.com/google-deepmind/mujoco_playground/tree/rss2025")
 
 
 def demo_playground_g1():
-    """Run the pre-trained Unitree G1 humanoid from MuJoCo Playground."""
+    """List G1 environments in the pinned JAX/MJX Playground release."""
     try:
         from mujoco_playground import registry
     except ImportError:
@@ -233,10 +227,10 @@ def demo_playground_g1():
         return
 
     print("\n=== MuJoCo Playground: Unitree G1 Humanoid ===")
-    g1_envs = [e for e in registry.list_environments() if "g1" in e.lower()]
+    g1_envs = [e for e in registry.ALL_ENVS if "g1" in e.lower()]
     print(f"G1 environments: {g1_envs}")
-    print("\nTo run interactively:")
-    print("  python -m mujoco_playground.play --env G1Joystick")
+    print("\nTraining and policy playback require the upstream JAX workflow:")
+    print("https://github.com/google-deepmind/mujoco_playground/tree/rss2025")
 
 
 def list_demos():
@@ -247,8 +241,8 @@ def list_demos():
     demos = [
         ("--brax-ant", "rl", "Train walking ant in ~3 min (PPO)"),
         ("--brax-humanoid", "rl", "Train walking humanoid in ~10 min (PPO)"),
-        ("--playground-go1", "demos", "Pre-trained Go1 quadruped (instant)"),
-        ("--playground-g1", "demos", "Pre-trained G1 humanoid (instant)"),
+        ("--playground-go1", "demos", "Inspect Go1 environment"),
+        ("--playground-g1", "demos", "List G1 environments"),
     ]
     for flag, extra, desc in demos:
         print(f"  {flag:<25s} {extra:<20s} {desc}")
@@ -276,9 +270,9 @@ if __name__ == "__main__":
     parser.add_argument("--brax-humanoid", action="store_true",
                         help="Train a Brax humanoid to walk (~10 min)")
     parser.add_argument("--playground-go1", action="store_true",
-                        help="Pre-trained Unitree Go1 quadruped")
+                        help="Inspect the Unitree Go1 environment")
     parser.add_argument("--playground-g1", action="store_true",
-                        help="Pre-trained Unitree G1 humanoid")
+                        help="List Unitree G1 environments")
     parser.add_argument("--list", action="store_true",
                         help="List all available demos")
     parser.add_argument("--no-render", action="store_true",
