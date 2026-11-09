@@ -1,197 +1,132 @@
-# Sim2Real: From MuJoCo to a Walking Robot on Your Desk
+# Bittle simulation-to-hardware transfer plan
 
-This guide covers deploying evolved/trained controllers from simulation
-to a real Petoi Bittle quadruped robot (~$300).
+Updated 2026-11-08. Bittle is the project's flagship locomotion demo and future
+hardware target. The goal is to compare a repertoire of gaits on speed,
+stability and robustness, then measure transfer on an identified physical unit.
+The [demo roadmap](DEMO_ROADMAP.md) defines D1-D6 and their acceptance criteria.
 
-## Hardware: What to Buy
+**Current status:** the simulator examples and serial deployment prototype do
+not share a compatible policy interface. No physical transfer has been validated
+here. The commands and interfaces in `sim2real/deploy_bittle.py` are prototype
+development tools, not a working export/deploy path for example 10 checkpoints.
 
-| Item | Price | Why |
-|------|-------|-----|
-| **Petoi Bittle X V2** | $299 | Feedback servos (reads actual joint angles), ESP32 WiFi/BT |
-| Alloy Servo Set (optional) | $150 | More durable, less backlash — recommended for repeated experiments |
-| USB-C cable | — | For serial communication (included with Bittle) |
+## Policy contract to implement first
 
-**Total: $299-450**
+| Contract field | Example 10 training | Current deployment prototype |
+|---|---|---|
+| Hidden units | 32 | Defaults to 64 |
+| Clock inputs | 8 phase-shifted sine/cosine channels | 2 channels |
+| Observations | All 28 model sensor scalars | 8 joint angles plus optional 3 Euler IMU values |
+| Action output | `1.5 * tanh(...)` | `tanh(...)`, then radians-to-degrees and offsets |
+| Control rate | 25 Hz | Defaults to 20 Hz; serial timing unmeasured |
 
-The **feedback servos** (Bittle X V2, post-May 2024) are critical — they let the
-robot report its actual joint positions back to your controller, closing the
-control loop. Without feedback, you're running open-loop and the sim2real gap
-is much larger.
+Changing `--n-hidden` or `--ctrl-hz` alone cannot reconcile these differences.
+Implement one versioned policy bundle with the observation order, units,
+normalization, clock construction, architecture, action interpretation, joint
+calibration, period, model hash and weights. Training and deployment must use
+that bundle. Compare both inference paths on the same recorded observations
+and require action agreement at `atol=1e-6, rtol=1e-5` before hardware trials.
 
-### Alternatives
+The simulation includes virtual touch, torso position and torso orientation
+information. The current training policy reads them even though some XML
+comments describe them as reward-only. Define a deployable observation subset
+from the actual hardware's available sensors; keep privileged simulation
+observations for metrics or a separately labeled ablation. Specify quaternion
+versus Euler conventions, sensor latency and missing-data behavior. A missing
+required observation must not silently become a zero-valued measurement.
 
-| Robot | Price | Pros | Cons |
-|-------|-------|------|------|
-| Petoi Bittle X V2 | $299 | Cheapest with feedback servos, proven sim2real | 8 DOF (no abduction) |
-| RealAnt | ~$410 DIY | Purpose-built for RL, MuJoCo model included | Requires assembly, external tracking |
-| Mini Pupper 2 | $649 | 12 DOF, ROS2, camera | More complex setup |
-| 3D-printed quadruped | ~$150 | Cheapest possible | No feedback servos, fragile |
-| Unitree Go2 Air | $1,600 | Professional quality | SDK locked — can't deploy custom policies! |
-| Unitree Go2 EDU | $12,000+ | Gold standard sim2real | Way too expensive for classroom |
+## Identify the hardware and model
 
-## The MuJoCo Bittle Model
+Record robot revision, controller board, firmware, servo type, battery and any
+payload. Verify which commands return measured joint positions and which return
+commanded targets on that configuration. Confirm IMU units, axes and update rate.
+Do not assume that every Bittle/Bittle X variant exposes the same feedback.
+Consult the current [Petoi documentation](https://docs.petoi.com/) and
+[Python API](https://docs.petoi.com/apis/python-api) for the identified unit.
 
-`models/bittle/bittle.xml` is a hand-authored MJCF model of the Bittle with:
+The local `models/bittle/bittle.xml` is a simplified eight-actuator model. Loading
+it with MuJoCo 4.0 gives **269 g total mass**; 177 g is only its torso. It uses
+position actuators without activation dynamics: the declared 40 ms `servo`
+default is not used by the actuators. Servo delay must be implemented and checked
+against measured response before treating it as a calibrated model parameter.
 
-- **8 position-controlled actuators** matching the real servo layout
-- **IMU sensor** (accelerometer + gyro) matching the MPU6050
-- **Joint position sensors** matching feedback servo readings
-- **Foot contact sensors** for reward shaping (virtual — not on real robot)
-- **Servo dynamics** modeled as first-order filter (40ms time constant)
-- Measured masses and inertias from the community URDF
+Compare the local model with
+[MarcHesse's Bittle X V1 model](https://github.com/MarcHesse/bittle-mujoco/tree/e00a6ab1495c421c0ed522cdf4eb1d3fc436c249).
+That source reports a measured 273.5 g V1/P1S-servo unit and includes OpenCat
+gaits and contact diagnostics. It is not yet validated in evo-embodied and must
+not silently replace our model or be assumed to describe another hardware
+revision. Preserve source attribution and separately version every model change.
 
-### Joint Map
+### Joint map to verify
 
-```
+```text
           FRONT
     FL (8,12)  FR (9,13)
-         ┌──────┐
-         │BITTLE│
-         └──────┘
+         +------+
+         |BITTLE|
+         +------+
     BL (11,15) BR (10,14)
           BACK
-
-Petoi joint indices: shoulder, knee
-MuJoCo actuators: servo_shoulder_XX, servo_knee_XX
 ```
 
-## Pipeline: Sim → Real
+Pairs denote Petoi shoulder/knee indices. Check each joint's sign, zero offset,
+mechanical limit and command unit against the selected model and firmware. Then
+replay known OpenCat stand/trot/walk sequences using the same conversion and
+timing in both environments.
 
-### Step 1: Train in Simulation
+## Planned progression
 
-Use any of the training scripts with the Bittle model:
+1. **D1: inference parity.** Export/import the policy bundle, compare actions on
+   saved observations, and reject incompatible bundles or unavailable inputs.
+2. **D2: model and baseline.** Audit mass/inertia, actuator response, joint map
+   and OpenCat fixture traces. Log tracking error, foot slip and body contact.
+3. **D3: full-length simulation.** Evaluate 10 s nominal and 30 s perturbed
+   episodes across native MuJoCo and MJX. The current passing 512-step replay
+   spans only 1.024 s and does not establish walking or transfer.
+4. **D4/D5: repertoire and robustness.** Run matched search comparisons, recheck
+   occupied elites on held-out scenarios, and publish policy-linked videos,
+   metrics, seeds, failures and compute costs.
+5. **D6: hardware trials.** Measure sustained command/feedback timing and servo
+   tracking on the identified unit. Compare the OpenCat reference with policies
+   selected on validation data, then report physical displacement, speed, falls,
+   drift and measured-versus-simulated response under recorded conditions.
+
+Domain randomization is a hypothesis to test against deterministic training.
+Choose ranges from measurements or label them as synthetic stress tests. Correct
+example 11's parent/candidate evaluation-panel mismatch before interpreting a
+comparison. Randomization does not guarantee transfer, and a command-magnitude
+penalty is not measured actuator energy.
+
+## Current prototype tools
+
+Inspect the deployment interface without opening a serial connection:
 
 ```bash
-# Evolve a walking gait (evolutionary approach)
-uv run python examples/09_coordinated_gait.py --output-dir /data/evo-embodied
-
-# Or train with PPO (RL approach, faster convergence)
-# (requires modifying to use bittle.xml instead of quadruped.xml)
+.venv/bin/python sim2real/deploy_bittle.py --help
 ```
 
-The key difference from the generic quadruped: the Bittle model uses
-**position actuators** (not torque), matching how real hobby servos work.
-The controller outputs target joint angles, not torques.
+Example 10 remains a simulation training prototype. Its saved policies require
+the D1 interface work and, when observation/model semantics change, retraining.
+A prototype `--dry-run` only avoids sending serial commands; it is not an
+inference-parity test, sensor calibration, or evidence of physical transfer.
 
-### Step 2: Test in Simulation
+## Related work and broader scope
 
-```bash
-# Render video of trained controller
-uv run python experiments/render_from_weights.py /data/evo-embodied/YYYYMMDD/
-```
-
-Watch the video. Does it look like walking? If it's leaping or flailing,
-see `docs/FITNESS_DESIGN.md` for fixes.
-
-### Step 3: Deploy to Real Bittle
-
-```bash
-# Plug in Bittle via USB
-# List serial ports
-uv run python sim2real/deploy_bittle.py --list-ports
-
-# Dry run (see commands without sending to robot)
-uv run python sim2real/deploy_bittle.py \
-    --weights /data/evo-embodied/YYYYMMDD/best_weights.npy \
-    --dry-run
-
-# Deploy for real (30 seconds, 20 Hz control)
-uv run python sim2real/deploy_bittle.py \
-    --weights /data/evo-embodied/YYYYMMDD/best_weights.npy \
-    --port /dev/ttyUSB0 \
-    --duration 30
-```
-
-### Step 4: Debug the Reality Gap
-
-The first deployment will probably not walk well. This is normal and is the
-most educational part. Common issues:
-
-| Symptom | Likely cause | Fix |
-|---------|-------------|-----|
-| Robot vibrates/oscillates | Servo PD gains too high in sim | Reduce `kp` in bittle.xml, retrain |
-| Robot falls immediately | Mass/inertia mismatch | Weigh your actual Bittle, update XML |
-| Legs move but no traction | Friction too high in sim | Reduce ground friction in XML |
-| Gait is too fast | Control freq mismatch | Match `--ctrl-hz` to training rate (25 Hz) |
-| One leg doesn't move | Servo offset wrong | Calibrate with `--dry-run`, check joint map |
-| Robot walks but drifts | No drift penalty in training | Add `y_drift` penalty, retrain |
-
-## Domain Randomization
-
-The most effective technique for closing the sim2real gap is training with
-randomized dynamics so the policy is robust to real-world variation.
-
-Add these to your training loop:
-
-```python
-# Randomize per-episode
-friction = default_friction * jax.random.uniform(key, (), 0.5, 1.5)
-servo_delay = jax.random.uniform(key, (), 0.02, 0.06)  # 20-60ms
-mass_scale = jax.random.uniform(key, (), 0.8, 1.2)
-imu_noise = jax.random.normal(key, (3,)) * 0.05  # rad
-joint_noise = jax.random.normal(key, (8,)) * 0.02  # rad
-```
-
-The idea: if the policy works across a wide range of simulated dynamics,
-it's more likely to work on the real robot (which has specific but unknown
-dynamics within that range).
-
-## Sim2Real Checklist
-
-Before deploying, verify:
-
-- [ ] **Position control**: Actuators output target angles (not torques)
-- [ ] **Control frequency**: Training and deployment use the same rate (20-25 Hz)
-- [ ] **Joint limits**: Sim limits match real servo range (-125° to +125°)
-- [ ] **Joint map**: MuJoCo actuator indices → Petoi servo indices are correct
-- [ ] **Servo offsets**: Calibrate zero position for each joint
-- [ ] **Safety**: Set conservative joint limits, start with slow/small motions
-- [ ] **Power**: Bittle battery charged, servos not overheating
-- [ ] **Catch the robot**: Have a hand ready to catch it when it falls
-
-## Existing Work
-
-These projects have successfully done Bittle sim2real:
-
-- [opencat-gym](https://github.com/ger01d/opencat-gym) — PyBullet + SB3 PPO
-- [opencat-gym-sim2real](https://github.com/ger01d/opencat-gym-sim2real) — deployment code
-- [Bittle URDF](https://github.com/AIWintermuteAI/Bittle_URDF) — measured robot model
-- [MuJoCo MPC Bittle](https://github.com/gravesreid/autonomous-bittle) — model predictive control
-- [Jabbour et al. RSS 2022](https://a2r-lab.org/publication/bittlesim2real/) — academic paper on Bittle sim2real
-- [Akgun et al. 2024](https://arxiv.org/html/2402.13201) — Decision Transformers on Bittle
+- [opencat-gym](https://github.com/ger01d/opencat-gym) and
+  [its deployment project](https://github.com/ger01d/opencat-gym-sim2real) are
+  candidate external control/transfer references; pin and reproduce their
+  protocols before comparing results.
+- [Bittle URDF](https://github.com/AIWintermuteAI/Bittle_URDF) is the source cited
+  by the local MJCF. Its provenance does not validate our simplified parameters.
+- The [demo roadmap](DEMO_ROADMAP.md) retains Go1 as a published locomotion
+  reference and Revolve2 as the modular body–controller co-design example.
 
 ## Sim2Real in Context
 
-This guide covers one corner of sim2real: **rigid-body, position-controlled, hobby-grade servos.** The "gap" being closed is a *dynamics gap* — servo delay, friction, mass, sensor noise. Domain randomization is the right tool, and Petoi Bittle is the right hardware. But this is one point in a much wider landscape, and students who want to understand where this project sits in the broader research field should know about the alternatives.
-
-### What counts as "sim2real" depends on what you're transferring to
-
-| Transfer target | Gap being closed | Simulator culture | Canonical work |
-|---|---|---|---|
-| **Rigid robot (this guide)** | Dynamics: servo delay, friction, mass, IMU noise | Standard rigid-body sim (MuJoCo, PyBullet) + domain randomization | [Jabbour et al. (Bittle, RSS 2022)](https://a2r-lab.org/publication/bittlesim2real/) |
-| **Soft / pneumatic robot** | Materials + manufacturing: elastomer modulus, pneumatic delay, fabrication tolerance | Differentiable MPM/FEM (SoftZoo, DiffPD, RoboDiff) — smooth contact for gradient flow | [Matthews, Spielberg, Rus, Kriegman, Bongard, *PNAS* 2023 (RoboDiff)](https://www.pnas.org/doi/abs/10.1073/pnas.2305180120) |
-| **Biobot (computationally designed organism)** | Developmental: voxel morphology → sculpted cardiac/skin cells from *Xenopus* frog embryos | Voxel-based mass-spring (voxcraft-sim) | [Kriegman, Blackiston, Levin, Bongard, *PNAS* 2020 (xenobots)](https://www.science.org/doi/10.1126/scirobotics.abf1571) |
-| **Continuum swimmer / FSI robot** | Medium coupling: reactive forces from fluid/granular environment | Differentiable MPM (SoftZoo) or CFD coupled with elastic structures | [Bruder et al., *RSS* 2019 (Koopman MPC for soft swimmers)](https://www.roboticsproceedings.org/rss15/p60.pdf) |
-
-Each row is a different sim2real problem, and each requires different mathematics. The Bittle gap can be closed with domain randomization. The soft-body gap requires getting elastomer constitutive parameters right. The biobot gap is closed by the *cells themselves* — the simulation just provides a morphology blueprint that frog skin and cardiac cells self-organize around. The fluid-coupling gap requires reduced-order models of the medium's response.
-
-### The two soft-body cultures
-
-Within soft-body sim there is a further split worth knowing:
-
-- **Hybrid / rigorous** (Hybrid Zero Dynamics, saltation matrices, legged-robot biomechanics): treats contact as a real switching event with proper jump linearizations. Mathematically clean; the standard tool for sim2real of legged systems.
-- **Smooth / gradient** (DiffTaichi, DiffPD, SoftZoo, RoboDiff): smooths contact with penalty forces or viscoelastic relaxation specifically to keep the simulation differentiable. Used by everyone doing gradient-based morphology design, including the direct xenobot lineage.
-
-The Bittle deployment in this guide sits in the hybrid culture (impacts, ground contact, real friction). If you cross over into voxel/soft-body evolution, you cross into the smooth culture. See [`docs/RESEARCH_GAPS.md`](RESEARCH_GAPS.md) for which mathematical primitives each side needs and what's still missing from the JAX ecosystem.
-
-### Why this matters for the course
-
-evo-embodied's Phase 4 (assignments 16-18) deliberately picks the *easiest* sim2real flavor — rigid quadruped on hard ground with feedback servos. Students who want to push further have the open-source platforms (Evolution Gym, SoftZoo, voxcraft-sim) and the unsolved problems (no JAX-native MPM, no first-class hybrid Floquet) waiting for them.
-
-## Further Reading
-
-- [Petoi Serial Protocol](https://docs.petoi.com/apis/serial-protocol)
-- [Petoi Joint Index](https://docs.petoi.com/petoi-robot-joint-index)
-- [Petoi Python API](https://docs.petoi.com/apis/python-api)
-- [Feedback Servo Docs](https://docs.petoi.com/apis/serial-protocol/feedback-servos)
-- [sim2real overview](https://www.reinforcementlearningpath.com/sim2real)
+Bittle addresses rigid-body locomotion with position-controlled servos. EvoGym
+is the separate soft-voxel reference; SoftZoo/RoboDiff address different material
+and design problems. Each needs its own model, observations, actuator semantics
+and transfer evidence. The virtual-rat pathway adds biological and motion-data
+validation rather than inheriting validity from a robot gait result. See
+[project choices](PROJECT_CHOICES.md), [research comparisons](RESEARCH_COMPARISONS.md)
+and [research gaps](RESEARCH_GAPS.md) for those tracks.

@@ -1,5 +1,21 @@
 # Observed validation status
 
+Demo-goal update, **2026-11-08**:
+
+- Adopted the [Bittle gait-repertoire roadmap](DEMO_ROADMAP.md), supported by
+  QDax planar-arm, pinned Playground Go1 and Revolve2 demonstrations.
+- Inspected the training/deployment interfaces at `5460ca6`: hidden size, clocks,
+  observations, action scale and default control rate differ. Policy export and
+  physical transfer remain unvalidated; the readiness claims have been corrected.
+- Loaded the unchanged Bittle XML with MuJoCo 4.0: total mass **0.269 kg**, eight
+  actuators, 28 sensor scalars, zero activation states and `dyntype=none` for every
+  actuator. The declared 40 ms servo default is unused. These are model-inspection
+  facts, not physical calibration or new trajectory results.
+- Reviewed the pinned community Bittle X V1 model and OpenCat fixtures as a future
+  comparison. No model was replaced, dependency updated, training campaign run
+  or hardware trial performed in this documentation update. Existing physics
+  failures remain open; 512 steps at 2 ms cover **1.024 s**, not a full gait trial.
+
 Original physics review: 2026-11-06. Base revision:
 `fde9fc82d41b4aff541df86d023a80d1e43805e7`.
 

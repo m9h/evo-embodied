@@ -2,6 +2,7 @@
 
 Paper mapping reviewed 2026-11-06 against `fde9fc8`; ecosystem choices refreshed
 2026-11-07 from evo-embodied `b7b4226` and the upstream snapshots below.
+Bittle demo reference added 2026-11-08 against local revision `5460ca6`.
 This is a source-backed comparison
 catalog, not a list of reproduced results. Execution protocols, budgets, and
 decision rules are in [VALIDATION_PLAN.md](VALIDATION_PLAN.md); observed local
@@ -34,6 +35,7 @@ applications; they are not benchmark results to claim reproduced.
 |---|---|---|
 | [evosax](https://github.com/RobertTLange/evosax/tree/e493325ec25e59350cce17f546f2e994971c958d) | CMA-ES/OpenES and GA alternatives to the current parallel hill climber | Same weights/encoding, initial-state distribution, action/observation contract, and charged evaluations; a categorical voxel decoder must be specified and audited |
 | [QDax 0.5.0](https://github.com/adaptive-intelligent-robotics/QDax/tree/v0.5.0) | MAP-Elites and behavior archives for B1/B9; analytic planar-arm integration is runnable now | Shared descriptor definition/grid, return offset, initial population and candidate budget; report coverage, QD score and best return, plus held-out archive reevaluation |
+| [MarcHesse/bittle-mujoco](https://github.com/MarcHesse/bittle-mujoco/tree/e00a6ab1495c421c0ed522cdf4eb1d3fc436c249) | Bittle X V1 MJCF, OpenCat gait fixtures and contact diagnostics for demo milestones D2/D3 | Author-reported mass measurements apply to V1 / BiBoard V0_1 / plastic P1S servos. Compare model geometry, actuator response, joint signs/offsets and timing; local replay and hardware calibration remain pending |
 | [Revolve2](https://github.com/ci-group/revolve2/tree/8156a66624f96c43cdfcec05bbb366cc492b87e0) | Modular body/brain evolution and CPG controllers; B6 rigid-body companion to EvoGym | Preserve module geometry, actuator semantics, terrain, controller learning budget and morphology encoding; equal simulator branding does not make tasks identical |
 | [EvoRL](https://github.com/EMI-Group/evorl/tree/43258389445ca18a9c8c47660301aa3071481951) | ERL/CEM-RL and population-based training comparisons in B1/B9 | Match environment transitions, architectures and held-out evaluation; count inner RL updates and population replacement costs; isolate the broader training dependencies |
 | [TensorNEAT](https://github.com/EMI-Group/tensorneat/tree/ee204900e8e55ffe0ed756651ea871c70230dd34), [NEAT-Python](https://github.com/CodeReclaimers/neat-python) | Topology-evolution baselines for B2 and B9 | Separate weight-only from topology-changing search; account for parameter/node limits and total evaluations |
@@ -62,6 +64,7 @@ Revolve2 reports LGPL-3.0). No code from those three projects is vendored here.
 | EvoRL | `43258389445ca18a9c8c47660301aa3071481951` | Source/metadata review only; workflow and dependency lock pending |
 | TensorNEAT | `ee204900e8e55ffe0ed756651ea871c70230dd34` | Source review only; fixed sensory/motor interface and bounded topology adapter pending |
 | Current Playground | [Snapshot](https://github.com/google-deepmind/mujoco_playground/tree/24a071343e380eb739a053650a9d12bf530cc92c) uses PyTorch, `reaf-sim` and Warp | Separate future runtime; installed 0.2.0 remains the JAX reference |
+| Bittle X V1 community model (Nov 8 review) | `e00a6ab1495c421c0ed522cdf4eb1d3fc436c249` | README/source review only; not installed, vendored or substituted for the local model |
 
 QDax's planar arm is an analytic fixture with no contact dynamics. It validates
 archive/search integration while the MuJoCo B0 gate stays open. Other QDax

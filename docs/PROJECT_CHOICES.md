@@ -1,6 +1,6 @@
 # Project mission, platform choices and integration priorities
 
-Reviewed 2026-11-07 against MuJoCo 4.0 and the upstream sources linked below.
+Backend review: 2026-11-07. Demo priorities updated 2026-11-08.
 The project combines evolutionary robotics teaching with a research path toward
 body–controller co-design, behavioral diversity, development and lifetime
 plasticity. The central research question is whether those mechanisms improve
@@ -10,6 +10,26 @@ The course and virtual-rat pathway remain part of that mission. Competitive
 performance, paper reproduction and biological fidelity require the evidence in
 [VALIDATION_PLAN.md](VALIDATION_PLAN.md); they are not established by installing
 more libraries. [VALIDATION_STATUS.md](VALIDATION_STATUS.md) records what ran.
+
+## Demo selection
+
+Keep **Bittle as the flagship locomotion demo**, with a goal of evolving a
+repertoire of gaits and comparing speed, stability and robustness. Its fixed
+body makes controller comparisons accessible and provides a future hardware
+target. Passing short engine replay checks does not establish learned walking
+or hardware transfer.
+
+Use **QDax's planar arm** as the quick search/behavior-diversity example,
+**Playground Go1 from the RSS 2025/0.2 lineage** as the published locomotion
+reference, and **Revolve2** for body–controller co-design. EvoGym remains the
+separate soft-body reference. Brax Ant/Humanoid remain secondary teaching demos.
+The [demo roadmap](DEMO_ROADMAP.md) defines the delivery order and evidence.
+
+Before selecting a Bittle model, compare our simplified MJCF with the
+[measured Bittle X V1 community model](https://github.com/MarcHesse/bittle-mujoco/tree/e00a6ab1495c421c0ed522cdf4eb1d3fc436c249)
+and its OpenCat gait/contact fixtures. Its author reports measurements for a
+specific V1/P1S-servo unit; those measurements do not calibrate other variants.
+Source review is complete; model adoption and local validation are pending.
 
 ## Physics and execution choices
 

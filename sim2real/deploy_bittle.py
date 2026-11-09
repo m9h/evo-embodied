@@ -1,14 +1,20 @@
-"""Deploy a trained policy to a real Petoi Bittle robot.
+"""Prototype serial policy loop for Petoi Bittle; hardware transfer is unvalidated.
 
-Reads sensor data from the Bittle (joint positions + IMU via serial),
-runs the neural network controller, and sends joint angle commands back.
+This interface does not yet match examples/10_bittle_gait.py: architecture,
+clock channels, observations, output scaling and default control rate differ.
+See docs/SIM2REAL.md and milestones D1-D6 in docs/DEMO_ROADMAP.md. A dry run
+avoids serial writes but does not establish training/deployment inference parity.
+
+The loop requests joint/IMU feedback, runs a neural controller and sends joint
+commands. Protocol support and actual-versus-commanded feedback must be checked
+on the identified robot/firmware/servo variant before hardware use.
 
 Requirements:
-  - Petoi Bittle X V2 with feedback servos (post-May 2024)
-  - USB serial connection (or WiFi via ESP32)
+  - Identified Petoi Bittle variant with verified feedback/command semantics
+  - USB serial connection
   - pyserial: uv add pyserial
 
-Usage:
+Prototype interface (not a validated workflow for example 10 checkpoints):
   # List available serial ports
   uv run python sim2real/deploy_bittle.py --list-ports
 
@@ -106,7 +112,7 @@ class BittleSerial:
         self.send(cmd)
 
     def read_feedback(self):
-        """Read feedback servo positions (Bittle X V2 only).
+        """Request servo feedback; semantics require verification on the actual unit.
 
         Returns dict of {petoi_joint_idx: angle_degrees} or None.
         """
@@ -162,7 +168,7 @@ class BittleSerial:
 
 
 class NeuralController:
-    """Neural network controller matching the sim training architecture."""
+    """Legacy inference layout; does not implement example 10's policy contract."""
 
     def __init__(self, weights_path, n_hidden=64, clock_freq=2.0):
         weights = np.load(weights_path)
@@ -296,7 +302,8 @@ def list_ports():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Deploy policy to Petoi Bittle")
+    parser = argparse.ArgumentParser(
+        description="Prototype Bittle policy loop; example 10 compatibility is pending. See docs/SIM2REAL.md.")
     parser.add_argument("--weights", type=str, help="Path to best_weights.npy")
     parser.add_argument("--port", type=str, default="/dev/ttyUSB0",
                         help="Serial port (default: /dev/ttyUSB0)")

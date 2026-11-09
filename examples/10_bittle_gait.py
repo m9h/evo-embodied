@@ -1,22 +1,26 @@
-"""Evolve a walking gait on the Petoi Bittle model (sim2real ready).
+"""Single-policy Bittle gait evolution prototype in simulation.
 
 Key differences from the generic quadruped (09_coordinated_gait.py):
 
 1. POSITION CONTROL — the Bittle uses hobby servos that accept target angles,
    not torques. The controller outputs desired joint angles, not forces.
 
-2. PHASE-OFFSET CLOCKS — four clock signals (one per leg) with 90-degree
-   phase offsets. This gives the controller enough information to produce
-   a trot or walk without discovering the phase relationship from scratch.
+2. PHASE-OFFSET CLOCKS — four sine/cosine pairs with 90-degree offsets.
+   These eight inputs are linearly redundant at one frequency; compare them
+   with a single pair under a matched controller-capacity budget.
 
-3. TINY ROBOT — the Bittle weighs 177g and stands 9cm tall. Fitness weights,
-   height thresholds, and mutation scales are tuned for this scale.
+3. SMALL MODEL — the loaded MJCF totals 269g; 177g is only the torso.
+   Its position actuators do not use the declared 40ms servo-filter default.
 
-4. RICH SENSORS — IMU (accel + gyro + quat), 8 joint positions, 4 foot
-   contacts, torso pose. 28 sensor values vs. 11 on the generic quadruped.
+4. SIMULATION OBSERVATIONS — IMU, 8 joint positions, 4 virtual foot contacts
+   and torso state: all 28 scalars enter the policy. They do not match the
+   observations assembled by the current hardware deployment prototype.
 
-This script produces a controller suitable for sim2real transfer (Assignment 18).
-Train here, then deploy with sim2real/deploy_bittle.py.
+The project goal is a repertoire compared on speed, stability and robustness;
+this script still evolves a single policy. Training/deployment architecture,
+clocks, observations, output scale and default control rate differ. Implement
+the shared policy contract and full-length validation in docs/DEMO_ROADMAP.md
+before treating these checkpoints as deployable. Hardware transfer is unvalidated.
 
 Run: uv run python examples/10_bittle_gait.py --output-dir /data/evo-embodied
 """
@@ -58,7 +62,7 @@ SEED = 42
 
 # Fitness weights — tuned for the Bittle's scale
 VELOCITY_WEIGHT = 2.0       # must be strong to overcome penalties at this scale
-ENERGY_WEIGHT = 0.01        # penalize squared torques (position control = smaller values)
+ENERGY_WEIGHT = 0.01        # target-angle magnitude proxy, not torque or physical work
 SMOOTHNESS_WEIGHT = 0.05    # penalize jerky angle changes
 HEIGHT_PENALTY_WEIGHT = 10.0  # penalize torso below threshold
 ALIVE_BONUS = 0.05         # per-step reward for staying upright
@@ -402,6 +406,6 @@ if __name__ == "__main__":
     render_video(mj_model, best_weights, n_s, n_m, run_dir)
 
     print(f"\nDone! Results: {run_dir}/", flush=True)
-    print(f"Next: deploy to real Bittle with sim2real/deploy_bittle.py", flush=True)
+    print("Next: validate the policy contract and repertoire goals in docs/DEMO_ROADMAP.md; hardware transfer is unvalidated.", flush=True)
     print(f"  Or: add domain randomization with examples/11_domain_randomization.py",
           flush=True)

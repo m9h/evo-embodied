@@ -1,4 +1,4 @@
-"""Domain randomization for sim2real transfer on the Petoi Bittle.
+"""Bittle domain-randomization prototype; robustness and transfer are unvalidated.
 
 The idea: if a policy works across many *different* simulations, it's more
 likely to work on the *real* robot (which has specific but unknown dynamics
@@ -17,13 +17,15 @@ This script extends 10_bittle_gait.py with two kinds of randomization:
    - Action noise: Gaussian noise on control outputs (servo imprecision)
    - External perturbation: random forces on torso (bumps, uneven ground)
 
-The result: lower peak fitness than deterministic training, but a policy
-that transfers to real hardware instead of exploiting simulation quirks.
+Test randomized versus deterministic training under matched budgets and held-out
+conditions. Correct the parent/candidate evaluation-panel mismatch documented in
+docs/VALIDATION_PLAN.md before interpreting comparisons. Randomization does not
+guarantee robustness or physical transfer.
 
 Run: uv run python examples/11_domain_randomization.py --output-dir /data/evo-embodied
-Compare: run 10_bittle_gait.py and this script, then deploy both to the
-real Bittle (sim2real/deploy_bittle.py). The randomized policy should
-perform better on hardware despite worse sim fitness.
+The accepted demo goal is a gait repertoire evaluated for speed, stability and
+robustness. See docs/DEMO_ROADMAP.md for the shared policy contract, model audit,
+OpenCat baseline and full-length evaluation required before hardware trials.
 """
 import argparse
 import json
@@ -519,4 +521,4 @@ if __name__ == "__main__":
 
     print(f"\nDone! Results: {run_dir}/", flush=True)
     print(f"Compare with deterministic training (10_bittle_gait.py).", flush=True)
-    print(f"Deploy both to real Bittle and see which transfers better.", flush=True)
+    print("Compare on a shared held-out panel after resolving the evaluator/interface gates in docs/DEMO_ROADMAP.md.", flush=True)

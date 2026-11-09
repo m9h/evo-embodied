@@ -23,6 +23,25 @@ The current population backend is **MJX-JAX**. Native MuJoCo is the CPU referenc
 MJX-Warp is a future NVIDIA comparison. MuJoCo 4's native deformables and
 speculative contacts are not automatically available in the JAX backend.
 
+## Demo goals
+
+The flagship goal is to **evolve a repertoire of Bittle gaits and compare their
+speed, stability and robustness under changed conditions**. Bittle provides the
+approachable locomotion example and a future hardware transfer target.
+
+| Demo | Purpose | Current state |
+|---|---|---|
+| **Bittle gait repertoire** | Compare useful behaviors, then test friction, load and disturbance robustness | Single-policy prototypes and short physics replay checks; repertoire and hardware transfer remain planned |
+| **QDax planar arm** | Explain evolutionary search, coverage and behavioral diversity | Runnable MAP-Elites/random-search comparison with three-seed integration evidence |
+| **Playground Go1 (RSS 2025 / 0.2)** | Reproduce a published locomotion reference | Environment inspection available; upstream policy reproduction pending |
+| **Revolve2 modular robot** | Demonstrate body–controller co-design | Source reviewed; isolated adapter and experiments pending |
+
+The [demo roadmap](docs/DEMO_ROADMAP.md) defines milestones and acceptance
+criteria. First priorities are Bittle policy export/inference parity, an OpenCat
+gait baseline, and full-length simulation evaluation. The current deployment
+prototype is incompatible with the training interface; hardware transfer has
+not been validated. See the [transfer plan](docs/SIM2REAL.md).
+
 ## Research validation
 
 The repository contains teaching examples and research prototypes. Its status as

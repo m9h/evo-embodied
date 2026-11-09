@@ -1,6 +1,6 @@
 # Validation plan for a competitive research platform
 
-Status: proposed experiments, refreshed 2026-11-07. Small engine replay,
+Status: proposed experiments, refreshed 2026-11-08. Small engine replay,
 dependency integration, float32 batching and analytic quality-diversity probes have been implemented and
 run; see [observed results](VALIDATION_STATUS.md) and [upgrade evidence](DEPENDENCIES.md).
 [RESEARCH_COMPARISONS.md](RESEARCH_COMPARISONS.md) identifies papers, code, and
@@ -11,6 +11,8 @@ version boundaries. A demonstration video is not a validation result.
 | Claim | Required evidence | Current state |
 |---|---|---|
 | Correct research substrate | Matched CPU/MJX replay, reset/sensor/action tests, reproducible seed handling and saved provenance | B0 started; contact/reset issues remain |
+| Reproducible Bittle gait-repertoire demo | D1-D5: shared policy contract, OpenCat baseline, full-length evaluation and corrected held-out archives | Planned; single-policy examples and short replay only |
+| Bittle hardware transfer | D6: calibrated unit, observable policy inputs, inference/timing parity and recorded physical trials | Not validated; current deployment interface differs from training |
 | Reproduces developmental-neurosimulation demonstrations | B2-B4 reference runs, port checks, documented deviations, independent repeats | Not implemented |
 | Competitive evolutionary-control platform | B1 and B5 matched-budget comparisons, uncertainty intervals, measured time-to-solution | Not measured |
 | Competitive morphology/control co-design platform | B6 uses the same upstream tasks and inner controller budgets as its comparators | Documented direction only |
@@ -22,6 +24,10 @@ validity from a few successful agents.
 Backend and project selection now follow [PROJECT_CHOICES.md](PROJECT_CHOICES.md).
 Revolve2/EvoRL/TensorNEAT remain reference-adapter work; only the bounded QDax
 planar-arm integration has been added to the executable comparison surface.
+The [demo roadmap](DEMO_ROADMAP.md) makes Bittle the flagship repertoire demo,
+QDax the introductory search example, Go1 the published locomotion reference,
+and Revolve2 the modular co-design example. Its D1-D6 milestones map onto this
+plan rather than replacing the research evidence gates.
 
 ## P0: audit findings to resolve before training comparisons
 
@@ -29,6 +35,9 @@ planar-arm integration has been added to the executable comparison surface.
 |---|---|---|
 | `models/quadruped.xml` begins with penetrating ground contacts; the replay probe measures a minimum distance of -0.13 m | Initial contact impulse can contaminate movement fitness | Define a settled, physically admissible reset. Archive the legacy reset as its own condition; compare old/new resets and charge settling consistently |
 | Driven quadruped replay differs between native MuJoCo and MJX-JAX | Rendering a policy on the CPU may not reproduce its training trajectory | B0: isolate first divergent step, constraint/contact/solver settings and precision; do not loosen tolerances after seeing the result |
+| Bittle training/deployment differ in hidden size, clocks, sensor construction, output scale and default control period | Exported example 10 weights do not establish a deployable controller | D1: one versioned policy contract; saved-observation JAX/NumPy action parity and explicit incompatible-input rejection |
+| Bittle policies consume virtual touch/torso state alongside IMU and joint sensors | Simulation observations exceed the current hardware input path | D1/D6: deployable observation subset, consistent normalization/timing and missing-data rules; privileged inputs are a labeled ablation |
+| Bittle XML declares an unused 40 ms servo default; loaded actuators have no activation dynamics | Documentation and proposed delay randomization do not describe the implemented model | D2: identify actuator response, choose the exact hardware variant, audit loaded dynamics and establish OpenCat stand/trot/walk fixtures before changing the model |
 | `examples/11_domain_randomization.py:evolve` keeps parent fitness while changing model/noise | Selection compares different objectives | Reevaluate parents and candidates on the same sampled model/noise panel every generation; regression case: an unchanged candidate must tie its parent. Select the final policy on a fixed validation panel |
 | `experiments/sweep.py` still uses the older distance/height objective; example 09 uses height/uprightness-gated velocity | Scores and speed measurements across examples are not directly comparable | One versioned task/evaluator contract with component metrics. Keep the older objective as an explicit ablation |
 | Many examples fix seed 42; no common multi-seed evaluator | Best-run reporting can hide instability | CLI/config seeds for initialization, world generation, mutation and evaluation; independent train/validation/test streams |
@@ -163,10 +172,13 @@ and evaluator agreement before interpreting optimizer comparisons.
 ## B1: locomotion and population throughput
 
 **Question:** does batching improve time-to-quality without rewarding a launch,
-fall, or body slide? Start with the repository quadruped and Bittle after B0.
+fall, or body slide? Prioritize Bittle for the flagship demo after its B0 gates;
+retain the generic quadruped as a separate diagnostic/control task.
 
 Compare zero control, a fixed periodic controller, random search, parallel hill
 climbing, evosax CMA-ES/OpenES, and PPO through a matched environment adapter.
+For Bittle, add versioned OpenCat stand/trot/walk references after joint-map and
+model validation. They are fixed behavior controls, not learned-policy samples.
 First compare search methods on the same feedforward policy class. PPO is a
 separate algorithm comparison with its architecture/normalization budget recorded.
 Add a pinned MuJoCo Playground locomotion task only after reproducing its upstream
@@ -187,7 +199,9 @@ occupied elites and metrics and checks analytic poses, replay and elitism. This
 is not a dynamic-robot benchmark and does not complete B0 or B1.
 
 **Next robot adapter, after B0:** use the same Bittle policy class and objective
-as the weight-search baseline. Start with a 10×10 archive of left/right foot
+as the weight-search baseline, including D1's export/inference contract. The
+flagship output is a repertoire compared on speed, stability and robustness,
+not only the highest training return. Start with a 10×10 archive of left/right foot
 contact duty factors in [0,1]; define the sensor aggregation, force threshold
 and sampling period in the task config before collecting comparisons. Validate
 the descriptors against hand-checked contact traces. Use identical initial
@@ -200,6 +214,14 @@ held-out reevaluation of every occupied cell. Recompute corrected coverage and
 QD score from held-out descriptors/returns: training archive size alone is not
 robustness evidence. Charge archive reevaluation separately and equally.
 
+For the Bittle demo, use D3's 10 s nominal and 30 s held-out episodes. Freeze
+friction, added load, actuator-response/noise and timed-disturbance panels using
+reference/validation data; test factors individually before combinations. Define
+all ranges, perturbation times, fall criteria and long-horizon tolerances before
+confirmation. Select displayed policies without test-set tuning, save videos
+linked to their policy/run IDs, and report all seeds and failures. A simulation
+demo can be complete without hardware evidence; D6 remains a separate claim.
+
 **Later EvoRL arm:** compare evolution alone, RL alone and one pinned ERL/CEM-RL
 workflow on that same task. Hold architecture and observation access fixed;
 report transitions, optimizer updates, compilation and wall time. Freeze the
@@ -208,8 +230,12 @@ inner learning budget and parent/candidate evaluation panel before confirmation.
 ### B1 budgets and outcome measures
 
 Pilot: 3 seeds x 64 candidates x (20 generations + initialization) = 4,032
-training rollouts per search method/task, each 100 control steps x 20 physics
-steps. Confirmation starts at 10 seeds x 64 x 201 = 128,640 rollouts per method/task;
+training rollouts per search method/task. For Bittle use 250 control steps x 20
+physics steps (10 s), or **20,160,000 training physics steps per method** in the
+pilot. The generic quadruped starts with 100 x 20 steps and is reported separately.
+Bittle held-out episodes use 750 x 20 steps (30 s); charge each occupied-elite
+reevaluation on all 20 held-out seeds separately. Confirmation starts at
+10 seeds x 64 x 201 = 128,640 rollouts per method/task;
 revise the declared budget using pilot costs before launching. Charge random
 search the same total evaluations, including initialization and reevaluations.
 Use populations 1/16/64/256 for timing on the same saved candidate pool.
@@ -428,14 +454,15 @@ controller comparison, with its inner learning cost charged to the same budget.
 
 | Work item | Depends on | Concrete completion evidence |
 |---|---|---|
-| PR-A: reset/evaluator correctness | None | Resolve audit blockers; analytic/contact fixtures; parent-candidate same-panel regression; CPU/MJX trace report |
+| PR-A: reset/evaluator correctness | None | Resolve audit blockers; D1 policy-contract parity; D2 actuator/model audit and OpenCat fixtures; D3 horizon checks; parent-candidate same-panel regression; CPU/MJX trace report |
 | PR-B: experiment runner and reporting | PR-A | Versioned configs, full seed control, cost accounting, checkpoint-resume equivalence, held-out evaluator, JSONL/NPZ report command |
 | PR-C: B2/B4 planar references | PR-B | Exported upstream fixtures, equation/code discrepancy log, original-versus-port plots, seed-level results |
 | PR-D: B3 learning reference | PR-C infrastructure | Stationary-update tests, acquisition/replacement experiments and forgetting curves |
-| PR-E: B1, B1-QD and B5 baselines | PR-B | Matched evosax/QDax/random/PPO contracts, corrected archive metrics, timing curves, pinned EvoGym worker and fixed-body report; analytic QDax integration is already available |
+| PR-E: B1, B1-QD and B5 baselines | PR-B | D4/D5 Bittle repertoire/robustness demo; matched evosax/QDax/random/PPO contracts; Go1 upstream baseline; corrected archive metrics and timing; pinned EvoGym fixed-body report |
 | PR-F: B6/B6-R co-design | PR-E | EvoGym historical/modern reports; isolated Revolve2 fixed-body parity, body/policy archives and complete costs |
 | PR-G: B7 controlled identification | PR-F | DMDc oracle check, held-out prediction and nonlinear disturbance-recovery ablations |
 | PR-H: B8/B9 extensions | Relevant reference gate | TensorNEAT/EvoRL runtime checks, preregistered developmental/plasticity/LLM ablations and evidence for a scoped new claim |
+| PR-I: D6 Bittle hardware transfer | D1-D3, available calibrated hardware | Identified robot/firmware/servos, measured sensor/actuator timing, baseline versus frozen-policy trial logs and failure report |
 
 The first useful release should contain PR-A through PR-C and PR-E, with a public
 failure ledger. PR-D/F/G then establish the developmental-learning and co-design

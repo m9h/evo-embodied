@@ -97,7 +97,7 @@ data.ctrl[0] = 0.5  # one line per motor
 
 **evo-embodied:** Sensors declared in XML, read from `data.sensordata`. MuJoCo has 30+ sensor types (touch, accelerometer, gyro, rangefinder, camera...) vs. PyBullet's contact points and joint states.
 
-**Sim2real connection:** The sensors here (joint position, IMU, touch) are the same ones available on the real Bittle robot in Phase 4.
+**Sim2real connection:** Verify joint-position and IMU availability on the selected Bittle hardware. Virtual touch and torso state are simulation measurements; a deployable policy needs an explicitly matched observation subset.
 
 ---
 
@@ -259,7 +259,11 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 
 ## Phase 4: Real Robot (Assignments 16-18) — NEW
 
-**Hardware required:** Petoi Bittle X V2 with feedback servos (~$300)
+**Demo goal:** evolve a repertoire of Bittle gaits and compare speed, stability
+and robustness. Follow [D1-D6 in the demo roadmap](docs/DEMO_ROADMAP.md).
+Simulation exercises need no robot. The later hardware exercise requires an
+identified Bittle variant with verified sensor/servo capabilities and calibration.
+The current deployment prototype does not yet match the training interface.
 
 ### Assignment 16: The Bittle Model
 
@@ -271,10 +275,11 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 1. Load the Bittle MJCF model, inspect it: `mujoco.MjModel.from_xml_path('models/bittle/bittle.xml')`
 2. Compare to `models/quadruped.xml`:
    - Bittle uses **position actuators** (target angles) vs. quadruped's **torque motors**
-   - Bittle has **servo dynamics** (40ms filter delay) — commands don't execute instantly
-   - Bittle is **tiny** (177g, 9cm tall) vs. the generic quadruped (multi-kg)
-3. Run your gait evolution from assignment 15 but on the Bittle model
-4. What changes? Does the same fitness function work? What breaks?
+   - The model declares a **40 ms servo filter**, but its active position actuators do not use it; inspect `actuator_dyntype` and `na`
+   - Loaded model mass is **269 g total**; 177 g describes only the torso
+3. Audit the joint map and compare the pinned community Bittle X V1 model and OpenCat stand/trot/walk fixtures from the roadmap
+4. Validate the shared policy contract and full-length evaluator before search comparisons; example 10 remains a single-policy prototype
+5. Compare the fixed gait baseline with evolved behaviors. Does forward progress come from walking, sliding or falling?
 
 **What students learn:** The sim2real gap starts in simulation. Position control ≠ torque control. Servo delay matters. Mass matters.
 
@@ -282,20 +287,16 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 
 ### Assignment 17: Domain Randomization
 
-**Goal:** Train a policy robust enough to transfer to real hardware.
+**Goal:** Test whether randomized training improves held-out robustness.
 
 **Exercise:**
-1. Train a gait on the exact Bittle model — it works in sim
-2. Randomize dynamics per-episode:
-   - Friction: ±50%
-   - Servo delay: 20-60ms
-   - Mass: ±20% per link
-   - IMU noise: ±5° orientation, ±0.5 m/s² acceleration
-   - Joint damping: ±30%
-3. Retrain with randomization — fitness will be lower, but the policy is more robust
-4. Compare videos: deterministic training vs. randomized training
+1. Correct example 11's parent/candidate evaluation-panel mismatch; unchanged candidates must tie parents under the same sampled conditions
+2. Freeze nominal, validation and test conditions, then evaluate deterministic training
+3. Choose randomization ranges from measurements or label them synthetic: friction, added load, actuator response, sensor noise and timed disturbances. Implement and validate delay dynamics before randomizing them
+4. Retrain at matched budgets and compare all seeds on the same held-out panel; report speed, falls, drift, actuator work and uncertainty
+5. Reevaluate the behavior archive, not just its best gait. Publish corrected coverage and QD score alongside clips
 
-**What students learn:** A policy that only works in one simulation is brittle. Domain randomization trades peak performance for robustness — exactly what you need for real hardware.
+**What students learn:** Robustness and transfer are measurable hypotheses. Randomization can help or hurt; nominal fitness and a selected video cannot establish its benefit.
 
 ---
 
@@ -306,17 +307,17 @@ Students modify the XML directly — add legs, change proportions, try hexapods,
 **Script:** `sim2real/deploy_bittle.py`
 **Guide:** `docs/SIM2REAL.md`
 
-**Exercise:**
-1. Connect Bittle via USB, verify: `--list-ports`
-2. Dry run: `--dry-run` — watch the commands, check they're reasonable
-3. Deploy: `--weights best_weights.npy --duration 10`
-4. Document what happens. It will probably not walk well. That's the point.
-5. Debug using the checklist in `docs/SIM2REAL.md`:
-   - Vibrating? → Lower servo gains in bittle.xml, retrain
-   - Falls immediately? → Weigh your actual Bittle, update the XML
-   - Legs move but no traction? → Floor friction mismatch
-6. Iterate: adjust model → retrain → redeploy → observe → adjust
-7. Write up: What was the biggest gap? How did you close it?
+**Status:** planned D6 exercise; the script is a prototype, not a compatible
+deployment path for example 10 checkpoints.
+
+**Exercise after D1-D3:**
+1. Verify exported-policy inference parity on recorded observations before opening a serial connection
+2. Record the actual robot/firmware/servo variant; calibrate joint signs/offsets, observable sensors and actuator response
+3. Measure sustained command/feedback timing against the policy's declared control rate
+4. Compare a verified OpenCat baseline with frozen policies selected using validation data
+5. Record displacement, speed, drift, falls and tracking error across repeated trials, including failures
+6. Diagnose the measured gap, version model/interface changes and retrain where needed
+7. Report the physical results separately from the simulation comparison; a dry run is not hardware validation
 
 **What students learn:** Sim2real is an iterative process of identifying and closing gaps between simulation and reality. No simulation is perfect — the skill is diagnosing which imperfections matter.
 
